@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hsms.driver", "hsms\hsms.driver.csproj", "{911BB1B1-8211-499E-8C67-1FAD6C3AC7CB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hsms.testsuite", "testsuite\hsms.testsuite.csproj", "{48CE3C1A-AFA1-49C4-AD18-421A89487CDF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{911BB1B1-8211-499E-8C67-1FAD6C3AC7CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{911BB1B1-8211-499E-8C67-1FAD6C3AC7CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{911BB1B1-8211-499E-8C67-1FAD6C3AC7CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{911BB1B1-8211-499E-8C67-1FAD6C3AC7CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48CE3C1A-AFA1-49C4-AD18-421A89487CDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48CE3C1A-AFA1-49C4-AD18-421A89487CDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48CE3C1A-AFA1-49C4-AD18-421A89487CDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48CE3C1A-AFA1-49C4-AD18-421A89487CDF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {99711263-E420-4A68-A332-B2943E3EF3A4}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,12 @@
+D:\projects\hb\lena\hsms\hsms\bin\Debug\hsms.dll.config
+D:\projects\hb\lena\hsms\hsms\bin\Debug\hsms.dll
+D:\projects\hb\lena\hsms\hsms\bin\Debug\hsms.pdb
+D:\projects\hb\lena\hsms\hsms\obj\Debug\hsms.driver.csprojAssemblyReference.cache
+D:\projects\hb\lena\hsms\hsms\obj\Debug\hsms.dll
+D:\projects\hb\lena\hsms\hsms\obj\Debug\hsms.pdb
+C:\Users\hpavolot\Documents\GIT\hsms\hsms\obj\Debug\hsms.driver.csprojAssemblyReference.cache
+C:\Users\hpavolot\Documents\GIT\hsms\hsms\obj\Debug\hsms.dll
+C:\Users\hpavolot\Documents\GIT\hsms\hsms\obj\Debug\hsms.pdb
+C:\Users\hpavolot\Documents\GIT\hsms\hsms\bin\Debug\hsms.dll.config
+C:\Users\hpavolot\Documents\GIT\hsms\hsms\bin\Debug\hsms.dll
+C:\Users\hpavolot\Documents\GIT\hsms\hsms\bin\Debug\hsms.pdb
