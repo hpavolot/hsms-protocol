@@ -8,6 +8,13 @@ namespace Semi.Hsms.Messages
   /// </summary>
   public class DataMessage : Message 
   {
+    #region Class members
+    /// <summary>
+    /// 
+    /// </summary>
+    protected bool _isReplyRequired;
+    #endregion
+
     #region Class properties
     /// <summary>
     /// 
@@ -24,7 +31,7 @@ namespace Semi.Hsms.Messages
     /// <summary>
     /// 
     /// </summary>
-    public override bool IsReplyRequired => false;
+    public override bool IsReplyRequired => _isReplyRequired;
     /// <summary>
     /// 
     /// </summary>

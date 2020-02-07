@@ -13,10 +13,13 @@ namespace Semi.Hsms.TestSuite
 		/// <param name="args"></param>
 		static void Main( string [] args )
 		{
-			var dm = new DataMessage( 1, 2 )
-			{
-				Function = 8
-			};
+
+			var dm = new DataMessage( 1, 2 );
+
+			// todo
+
+			socket.Send( bytes );
+			
 			//var driver = new HsmsDriver();
 
 			//driver.Send();

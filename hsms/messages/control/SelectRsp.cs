@@ -3,6 +3,9 @@
 
 namespace Semi.Hsms.Messages
 {
+	/// <summary>
+	/// 
+	/// </summary>
   public class SelectRsp : ControlMessage 
   {
 		#region Class properties
@@ -14,10 +17,6 @@ namespace Semi.Hsms.Messages
 		/// 
 		/// </summary>
 		public override MessageType Type => MessageType.SelectRsp;
-		/// <summary>
-		/// 
-		/// </summary>
-		public override bool IsReplyRequired => false;
 		#endregion
 
 		#region Class initialization

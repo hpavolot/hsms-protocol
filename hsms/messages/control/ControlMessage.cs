@@ -19,6 +19,16 @@ namespace Semi.Hsms.Messages
         return ( 0 != ( ( ( uint )Type ) & 1 ) );
       }
     }
+    /// <summary>
+		/// 
+		/// </summary>
+		public override bool IsReplyRequired
+    {
+      get
+      {
+        return IsPrimary;
+      }
+    }
     #endregion
 
     #region Class initialization

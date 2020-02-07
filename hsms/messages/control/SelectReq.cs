@@ -16,10 +16,6 @@ namespace Semi.Hsms.Messages
 				return MessageType.SelectReq;
 			}
 		}
-		/// <summary>
-		/// 
-		/// </summary>
-		public override bool IsReplyRequired => true;
 		#endregion
 
 		#region Class initialization

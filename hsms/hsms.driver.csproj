@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{911BB1B1-8211-499E-8C67-1FAD6C3AC7CB}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>hsms</RootNamespace>
+    <RootNamespace>Semi.Hsms</RootNamespace>
     <AssemblyName>hsms</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
