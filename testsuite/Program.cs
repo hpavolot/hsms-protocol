@@ -1,5 +1,7 @@
 ﻿#region Usings
+using Semi.Hsms.Coding;
 using Semi.Hsms.Messages;
+using System;
 #endregion
 
 namespace Semi.Hsms.TestSuite
@@ -13,16 +15,13 @@ namespace Semi.Hsms.TestSuite
 		/// <param name="args"></param>
 		static void Main( string [] args )
 		{
+			var sr = new SelectReq( 1, 2 );
+			var bytes = Encoder.Encode( sr );
 
-			var dm = new DataMessage( 1, 2 );
+			var sr2 = Decoder.Decode( bytes );
 
-			// todo
-
-			socket.Send( bytes );
-			
-			//var driver = new HsmsDriver();
-
-			//driver.Send();
+			Console.WriteLine( sr.Equals( sr2 ) );
+		
 		}
 		#endregion
 	}

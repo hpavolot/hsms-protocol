@@ -18,3 +18,13 @@ C:\Users\hpavolot\Documents\GIT\hsms\testsuite\obj\Debug\hsms.testsuite.csprojAs
 C:\Users\hpavolot\Documents\GIT\hsms\testsuite\obj\Debug\hsms.testsuite.csproj.CopyComplete
 C:\Users\hpavolot\Documents\GIT\hsms\testsuite\obj\Debug\testsuite.exe
 C:\Users\hpavolot\Documents\GIT\hsms\testsuite\obj\Debug\testsuite.pdb
+D:\projects\hb\lena\hsms-protocol\testsuite\bin\Debug\testsuite.exe.config
+D:\projects\hb\lena\hsms-protocol\testsuite\bin\Debug\testsuite.exe
+D:\projects\hb\lena\hsms-protocol\testsuite\bin\Debug\testsuite.pdb
+D:\projects\hb\lena\hsms-protocol\testsuite\bin\Debug\hsms.dll
+D:\projects\hb\lena\hsms-protocol\testsuite\bin\Debug\hsms.pdb
+D:\projects\hb\lena\hsms-protocol\testsuite\bin\Debug\hsms.dll.config
+D:\projects\hb\lena\hsms-protocol\testsuite\obj\Debug\hsms.testsuite.csprojAssemblyReference.cache
+D:\projects\hb\lena\hsms-protocol\testsuite\obj\Debug\hsms.testsuite.csproj.CopyComplete
+D:\projects\hb\lena\hsms-protocol\testsuite\obj\Debug\testsuite.exe
+D:\projects\hb\lena\hsms-protocol\testsuite\obj\Debug\testsuite.pdb

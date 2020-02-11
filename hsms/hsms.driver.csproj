@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="coder\Decoder.cs" />
+    <Compile Include="coder\Encoder.cs" />
     <Compile Include="messages\control\ControlMessage.cs" />
     <Compile Include="messages\control\DeselctReq.cs" />
     <Compile Include="messages\control\DeselctRsp.cs" />
