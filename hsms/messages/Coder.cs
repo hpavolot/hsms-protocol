@@ -34,21 +34,22 @@ namespace Semi.Hsms.Messages
 					writer.Write(byte.MinValue); //what about Reject.req? and linktest == 0xxFFFF
 
 					// Byte 3
-					if (message.IsReplyRequired || message.Type == MessageType.LinktestRsp)
-						writer.Write(byte.MinValue);
-					else
-						switch (message)
-						{
-							case SelectRsp selectRsp:
-								writer.Write(selectRsp.Status);
-								break;
-							case DeselectRsp deselectRsp:
-								writer.Write(deselectRsp.Status);
-								break;
-							case RejectReq rejectReq:
-								writer.Write(rejectReq.Reason);
-								break;
-						}
+
+					switch (message)
+					{
+						case SelectRsp selectRsp:
+							writer.Write(selectRsp.Status);
+							break;
+						case DeselectRsp deselectRsp:
+							writer.Write(deselectRsp.Status);
+							break;
+						case RejectReq rejectReq:
+							writer.Write(rejectReq.Reason);
+							break;
+						default:
+							writer.Write(byte.MinValue);
+							break;
+					}
 					// PType
 					writer.Write(byte.MinValue);
 
@@ -65,7 +66,7 @@ namespace Semi.Hsms.Messages
 			}
 			return arr;
 		}
-	
+
 		#region Explicit Encode methods
 		/// /// <summary>
 		/// 
@@ -326,23 +327,75 @@ namespace Semi.Hsms.Messages
 		/// </summary>
 		/// <param name="buffer"></param>
 		/// <returns></returns>
-		public static SelectReq Decode(byte[] buffer)
+		public static Message Decode(byte[] buffer)
 		{
-			SelectReq sr = null;
-
 			using (var ms = new MemoryStream(buffer))
 			{
 				using (var reader = new BinaryReader(ms))
 				{
-					var device = reader.ReadUInt16();
+					// SessionId
+					var device = BitConverter.ToUInt16(
+						reader.ReadBytes(2)
+						.Reverse().
+						ToArray(),
+						0);
 
-					var context = reader.ReadUInt32();
+					// System bytes
+					ms.Position = 6;
+					var context = BitConverter.ToUInt16(
+						reader.ReadBytes(4)
+						.Reverse().
+						ToArray(),
+						0);
+					// SType5
+					ms.Position = 5;
 
-					sr = new SelectReq(device, context);
+					var msgType = (MessageType)reader.ReadByte();
+					ms.Position = 3;
+
+					switch (msgType)
+					{
+						case MessageType.SelectReq:
+							{
+								return new SelectReq(device, context);
+							}
+						case MessageType.SelectRsp:
+							{
+								var status = reader.ReadByte();
+								return new SelectRsp(device, context, status);
+							}
+						case MessageType.DeselectReq:
+							{
+								return new DeselectReq(device, context);
+							}
+						case MessageType.DeselectRsp:
+							{
+								var status = reader.ReadByte();
+								return new DeselectRsp(device, context, status);
+							}
+						case MessageType.LinktestReq:
+							{
+								return new LinkTestReq(device, context);
+							}
+						case MessageType.LinktestRsp:
+							{
+								return new LinkTestRsp(device, context);
+							}
+						case MessageType.RejectReq:
+							{
+								var reason = reader.ReadByte();
+								return new RejectReq(device, context, reason);
+							}
+						case MessageType.SeparateReq:
+							{
+								return new SeparateReq(device, context);
+							}
+						default:
+							return null;
+					}
+
 				}
 			}
-
-			return sr;
 		}
 		#endregion
 	}
