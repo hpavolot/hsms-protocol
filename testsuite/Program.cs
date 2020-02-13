@@ -1,5 +1,4 @@
 ﻿#region Usings
-using Semi.Hsms.Coding;
 using Semi.Hsms.Messages;
 using System;
 #endregion
@@ -15,13 +14,16 @@ namespace Semi.Hsms.TestSuite
 		/// <param name="args"></param>
 		static void Main( string [] args )
 		{
-			var sr = new SelectReq( 1, 2 );
-			var bytes = Encoder.Encode( sr );
+			var sreq = new SelectReq( 1, 2 );
+			var srsp = new SelectRsp( 1, 2, 3 );
 
-			var sr2 = Decoder.Decode( bytes );
+			var bytes = Coder.Encode( sreq );
+			var bytes2 = Coder.Encode( srsp );
 
-			Console.WriteLine( sr.Equals( sr2 ) );
-		
+			//var sr2 = Coder.Decode( bytes );
+
+			//Console.WriteLine( sr.Equals( sr2 ) );
+
 		}
 		#endregion
 	}

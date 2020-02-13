@@ -13,6 +13,6 @@ C:\Users\hpavolot\Documents\GIT\hsms\hsms\bin\Debug\hsms.pdb
 D:\projects\hb\lena\hsms-protocol\hsms\bin\Debug\hsms.dll.config
 D:\projects\hb\lena\hsms-protocol\hsms\bin\Debug\hsms.dll
 D:\projects\hb\lena\hsms-protocol\hsms\bin\Debug\hsms.pdb
-D:\projects\hb\lena\hsms-protocol\hsms\obj\Debug\hsms.driver.csprojAssemblyReference.cache
 D:\projects\hb\lena\hsms-protocol\hsms\obj\Debug\hsms.dll
 D:\projects\hb\lena\hsms-protocol\hsms\obj\Debug\hsms.pdb
+D:\projects\hb\lena\hsms-protocol\hsms\obj\Debug\hsms.driver.csprojAssemblyReference.cache
