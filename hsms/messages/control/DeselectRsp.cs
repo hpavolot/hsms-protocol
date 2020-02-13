@@ -6,7 +6,7 @@ namespace Semi.Hsms.Messages
 	/// <summary>
 	/// 
 	/// </summary>
-	public class DeselctRsp : ControlMessage
+	public class DeselectRsp : ControlMessage
 	{
 		#region Class properties
 		/// <summary>
@@ -26,7 +26,7 @@ namespace Semi.Hsms.Messages
 		/// <param name="device"></param>
 		/// <param name="context"></param>
 		/// <param name="status"></param>
-		public DeselctRsp( ushort device, uint context, byte status ) : base( device, context )
+		public DeselectRsp( ushort device, uint context, byte status ) : base( device, context )
 		{
 			Status = status;
 		}

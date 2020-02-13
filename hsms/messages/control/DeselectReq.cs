@@ -3,7 +3,7 @@
 
 namespace Semi.Hsms.Messages
 {
-	public class DeselctReq : ControlMessage
+	public class DeselectReq : ControlMessage
 	{
 		#region Class properties
 		/// <summary>
@@ -18,7 +18,7 @@ namespace Semi.Hsms.Messages
 		/// </summary>
 		/// <param name="device"></param>
 		/// <param name="context"></param>
-		public DeselctReq( ushort device, uint context ) 
+		public DeselectReq( ushort device, uint context ) 
 			: base( device, context )
 		{
 

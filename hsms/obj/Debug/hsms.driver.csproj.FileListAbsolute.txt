@@ -16,3 +16,9 @@ D:\projects\hb\lena\hsms-protocol\hsms\bin\Debug\hsms.pdb
 D:\projects\hb\lena\hsms-protocol\hsms\obj\Debug\hsms.dll
 D:\projects\hb\lena\hsms-protocol\hsms\obj\Debug\hsms.pdb
 D:\projects\hb\lena\hsms-protocol\hsms\obj\Debug\hsms.driver.csprojAssemblyReference.cache
+C:\Users\hpavolot\Documents\GIT\hsms-protocol\hsms\obj\Debug\hsms.driver.csprojAssemblyReference.cache
+C:\Users\hpavolot\Documents\GIT\hsms-protocol\hsms\obj\Debug\hsms.dll
+C:\Users\hpavolot\Documents\GIT\hsms-protocol\hsms\obj\Debug\hsms.pdb
+C:\Users\hpavolot\Documents\GIT\hsms-protocol\hsms\bin\Debug\hsms.dll.config
+C:\Users\hpavolot\Documents\GIT\hsms-protocol\hsms\bin\Debug\hsms.dll
+C:\Users\hpavolot\Documents\GIT\hsms-protocol\hsms\bin\Debug\hsms.pdb

@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Semi.Hsms</RootNamespace>
     <AssemblyName>hsms</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -49,16 +49,19 @@
   <ItemGroup>
     <Compile Include="messages\Coder.cs" />
     <Compile Include="messages\control\ControlMessage.cs" />
-    <Compile Include="messages\control\DeselctReq.cs" />
-    <Compile Include="messages\control\DeselctRsp.cs" />
+    <Compile Include="messages\control\DeselectReq.cs" />
+    <Compile Include="messages\control\DeselectRsp.cs" />
     <Compile Include="messages\control\LinkTestRsp.cs" />
     <Compile Include="messages\control\LinkTestReq.cs" />
     <Compile Include="messages\control\RejectReq.cs" />
     <Compile Include="messages\control\SelectRsp.cs" />
     <Compile Include="messages\control\SelectReq.cs" />
+    <Compile Include="enums\DeselectStatus.cs" />
+    <Compile Include="enums\ReasonCode.cs" />
+    <Compile Include="enums\SelectStatus.cs" />
     <Compile Include="messages\control\SeparateReq.cs" />
     <Compile Include="messages\data\DataMessage.cs" />
-    <Compile Include="messages\MessageType.cs" />
+    <Compile Include="enums\MessageType.cs" />
     <Compile Include="messages\Message.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -66,7 +69,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="coder\" />
     <Folder Include="connections\" />
     <Folder Include="log\" />
   </ItemGroup>
