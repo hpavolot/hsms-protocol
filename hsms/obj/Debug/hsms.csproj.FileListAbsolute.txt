@@ -1,6 +1,0 @@
-D:\projects\hb\lena\hsms\hsms\bin\Debug\hsms.dll.config
-D:\projects\hb\lena\hsms\hsms\bin\Debug\hsms.dll
-D:\projects\hb\lena\hsms\hsms\bin\Debug\hsms.pdb
-D:\projects\hb\lena\hsms\hsms\obj\Debug\hsms.csprojAssemblyReference.cache
-D:\projects\hb\lena\hsms\hsms\obj\Debug\hsms.dll
-D:\projects\hb\lena\hsms\hsms\obj\Debug\hsms.pdb
