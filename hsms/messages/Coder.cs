@@ -50,30 +50,10 @@ namespace Semi.Hsms.Messages
                     w.WriteBody(m);
                 }
                 
-                msgBytes = AppendLengthBytes(ms.ToArray());
+                msgBytes = ms.AppendLengthBytes();
             }
 
             return msgBytes;
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arr"></param>
-        /// <returns></returns>
-        private static byte[] AppendLengthBytes(byte[] arr)
-        {
-            var arrFinal = new byte [arr.Length + 4];
-            
-            var bytesForLength = BitConverter
-                .GetBytes(arr.Length)
-                .Reverse()
-                .ToArray();
-            
-            bytesForLength.CopyTo(arrFinal, 0);
-            arr.CopyTo(arrFinal, 4);
-
-            return arrFinal;
         }
 
         #endregion
@@ -243,6 +223,28 @@ namespace Semi.Hsms.Messages
             // todo
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ms"></param>
+        /// <returns></returns>
+        public static byte[] AppendLengthBytes(this MemoryStream ms)
+        {
+            var arr = ms.ToArray();
+            
+            var arrFinal = new byte [arr.Length + 4];
+            
+            var bytesForLength = BitConverter
+                .GetBytes(arr.Length)
+                .Reverse()
+                .ToArray();
+            
+            bytesForLength.CopyTo(arrFinal, 0);
+            arr.CopyTo(arrFinal, 4);
+
+            return arrFinal;
+        }
+        
         #endregion
     }
 
