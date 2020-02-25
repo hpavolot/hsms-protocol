@@ -18,7 +18,7 @@ namespace Semi.Hsms.TestSuite
 		{
 			//var dict = new Dictionary<Message, string>();
 
-			var a = new LinkTestReq( 1 );
+			var a = new SelectRsp( 1,2,3 );
 
 			var arr = Coder.Encode( a );
 			//BinaryWriter bw;
