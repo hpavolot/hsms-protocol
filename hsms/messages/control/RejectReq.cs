@@ -46,6 +46,38 @@ namespace Semi.Hsms.Messages
 		{
 			return "reject req";
 		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public override bool Equals( object obj )
+		{
+			if( !base.Equals( obj ) )
+				return false;
+
+			var m = obj as RejectReq;
+
+			if( null == m )
+				return false;
+
+			if( Reason != m.Reason )
+				return false;
+
+			return true;
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public override int GetHashCode()
+		{
+			int hash = base.GetHashCode();
+
+			hash = hash * 23 + Reason.GetHashCode();
+
+			return hash;
+		}
 		#endregion
 	}
 }

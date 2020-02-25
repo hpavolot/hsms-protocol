@@ -39,7 +39,39 @@ namespace Semi.Hsms.Messages
 		/// <returns></returns>
 		public override string ToString()
 		{
-			return "deselt rsp";
+			return "deselect rsp";
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public override bool Equals( object obj )
+		{
+			if( !base.Equals( obj ) )
+				return false;
+
+			var m = obj as DeselectRsp;
+
+			if( null == m )
+				return false;
+
+			if( Status != m.Status )
+				return false;
+
+			return true;
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public override int GetHashCode()
+		{
+			int hash = base.GetHashCode();
+
+			hash = hash * 23 + Status.GetHashCode();
+
+			return hash;
 		}
 		#endregion
 	}
