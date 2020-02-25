@@ -41,6 +41,38 @@ namespace Semi.Hsms.Messages
 		{
 			return "select rsp";
 		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public override bool Equals( object obj )
+		{
+			if( !base.Equals( obj ) )
+				return false;
+
+			var m = obj as SelectRsp;
+
+			if( null == m )
+				return false;
+
+			if( Status != m.Status )
+				return false;
+
+			return true;
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public override int GetHashCode()
+		{
+			int hash = base.GetHashCode();
+
+			hash = hash * 23 + Status.GetHashCode();
+
+			return hash;
+		}
 		#endregion
 	}
 }

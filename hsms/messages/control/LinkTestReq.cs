@@ -18,7 +18,8 @@ namespace Semi.Hsms.Messages
 		/// </summary>
 		/// <param name="device"></param>
 		/// <param name="context"></param>
-		public LinkTestReq( ushort device, uint context ) : base( device, context )
+		public LinkTestReq( uint context ) 
+			: base( ushort.MaxValue, context )
 		{
 
 		}
@@ -34,6 +35,5 @@ namespace Semi.Hsms.Messages
 			return "link test req";
 		}
 		#endregion
-
 	}
 }

@@ -53,5 +53,51 @@ namespace Semi.Hsms.Messages
       Time = DateTime.Now;
     }
     #endregion
-  } 
+
+    #region Class public methods
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
+    public override bool Equals( object obj )
+    {
+      if( null == obj )
+        return false;
+
+      if( object.ReferenceEquals( this, obj ) )
+        return true;
+
+      var m = obj as Message;
+
+      if( null == m )
+        return false;
+
+      if( Device != m.Device )
+        return false;
+
+      if( Context != m.Context )
+        return false;
+
+      if( Type != m.Type )
+        return false;
+
+      return true;
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public override int GetHashCode()
+    {
+      int hash = 17;
+
+      hash = hash * 23 + Device.GetHashCode();
+      hash = hash * 23 + Context.GetHashCode();
+      hash = hash * 23 + Type.GetHashCode();
+
+      return hash;
+    }
+    #endregion
+  }
 }

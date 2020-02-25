@@ -21,8 +21,8 @@ namespace Semi.Hsms.Messages
 		/// </summary>
 		/// <param name="device"></param>
 		/// <param name="context"></param>
-		public LinkTestRsp( ushort device, uint context ) 
-			: base( device, context )
+		public LinkTestRsp( uint context ) 
+			: base( ushort.MaxValue, context )
 		{
 		}
 		#endregion
