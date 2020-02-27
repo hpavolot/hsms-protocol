@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="config\Configurator.cs" />
     <Compile Include="messages\Coder.cs" />
     <Compile Include="messages\control\ControlMessage.cs" />
     <Compile Include="messages\control\DeselectReq.cs" />
@@ -56,8 +57,6 @@
     <Compile Include="messages\control\RejectReq.cs" />
     <Compile Include="messages\control\SelectRsp.cs" />
     <Compile Include="messages\control\SelectReq.cs" />
-    <Compile Include="enums\DeselectStatus.cs" />
-    <Compile Include="enums\ReasonCode.cs" />
     <Compile Include="enums\SelectStatus.cs" />
     <Compile Include="messages\control\SeparateReq.cs" />
     <Compile Include="messages\data\DataMessage.cs" />
