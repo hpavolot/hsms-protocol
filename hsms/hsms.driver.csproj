@@ -64,6 +64,7 @@
     <Compile Include="messages\data\Format.cs" />
     <Compile Include="messages\data\DataMessage.cs" />
     <Compile Include="enums\MessageType.cs" />
+    <Compile Include="messages\data\StringItem.cs" />
     <Compile Include="messages\Message.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
