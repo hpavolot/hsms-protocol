@@ -7,7 +7,8 @@ namespace Semi.Hsms.Messages
   /// <summary>
   /// 
   /// </summary>
-  public class NumericItem<T>: DataItem
+  public class NumericItem<T> : DataItem
+		where T : IComparable, new()
 	{
 		#region Class members
 		/// <summary>
@@ -17,7 +18,10 @@ namespace Semi.Hsms.Messages
 		#endregion
 
 		#region Class properties
-
+		/// <summary>
+		/// 
+		/// </summary>
+		public T Value => _value;
 		#endregion
 
 		#region Class initializations
@@ -26,57 +30,57 @@ namespace Semi.Hsms.Messages
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="value"></param>
-		internal NumericItem( string n, T value )
+		protected NumericItem( T value, Format f )
 		{
-			_name = n;
 			_value = value;
+			_format = f;
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public override string ToString()
+		{
+			return $"[{_format.ToString()}] {Value}";
+		}
+		#endregion
 
-			switch( System.Type.GetTypeCode( typeof( T ) ) )
-			{
-				case TypeCode.Byte:
-					_format = Format.U1;
-					break;
+		#region Class internal structs
+		#endregion
+	}
 
-				case TypeCode.UInt16:
-					_format = Format.U2;
-					break;
+	/// <summary>
+	/// 
+	/// </summary>
+	public class I2 : NumericItem<short> 
+	{
+		#region Class initializations
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name=""></param>
+		public I2( short v ) 
+			:base( v, Format.I2 )
+		{
 
-				case TypeCode.UInt32:
-					_format = Format.U4;
-					break;
+		}
+		#endregion
+	}
 
-				case TypeCode.UInt64:
-					_format = Format.U8;
-					break;
+	/// <summary>
+	/// 
+	/// </summary>
+	public class U2 : NumericItem<ushort>
+	{
+		#region Class initializations
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name=""></param>
+		public U2( ushort v )
+			: base( v, Format.U2 )
+		{
 
-				case TypeCode.SByte:
-					_format = Format.I1;
-					break;
-
-				case TypeCode.Int16:
-					_format = Format.I2;
-					break;
-
-				case TypeCode.Int32:
-					_format = Format.I4;
-					break;
-
-				case TypeCode.Int64:
-					_format = Format.I8;
-					break;
-
-				case TypeCode.Double:
-					_format = Format.F8;
-					break;
-
-				case TypeCode.Single:
-					_format = Format.F4;
-					break;
-
-				case TypeCode.Boolean:
-					_format = Format.Bool;
-					break;
-			}
 		}
 		#endregion
 	}

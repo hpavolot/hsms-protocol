@@ -18,20 +18,19 @@ namespace Semi.Hsms.TestSuite
 		/// <param name="args"></param>
 		static void Main( string [] args )
 		{
-			var ipAddress = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0];  
-			
-			var c = Configurator
-				.Builder
-				.IP(ipAddress)
-				.T3( 100 )
-				.T5( 200 )
-				.Build();
+			//var message = DataMessage
+			//	.Builder
+			//	.Stream( 1 )
+			//	.Function( 5 )
+			//	.Device( 1 )
+			//	.Context( 522555 )
+			//	.DataItems( !!!!
+			//		new I2( 32 ),
+			//		new U2( 7000 ) )
+			//	.Build();
 
-			var c1 = Configurator
-				.Builder
-				.Copy( c )
-				.T5( 300 )
-				.Build();
+			// params
+			
 		}
 		#endregion
 	}

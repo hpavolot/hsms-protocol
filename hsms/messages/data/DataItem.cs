@@ -6,13 +6,9 @@ namespace Semi.Hsms.Messages
   /// <summary>
   /// 
   /// </summary>
-  public class DataItem
+  public abstract class DataItem
   {
 		#region Class members
-		/// <summary>
-		/// 
-		/// </summary>
-		protected string _name;
 		/// <summary>
 		/// 
 		/// </summary>
@@ -20,16 +16,6 @@ namespace Semi.Hsms.Messages
 		#endregion
 
 		#region Class properties
-		/// <summary>
-		/// 
-		/// </summary>
-		public string Name
-		{
-			get
-			{
-				return _name;
-			}
-		}
 		/// <summary>
 		/// 
 		/// </summary>
