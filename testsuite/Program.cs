@@ -1,11 +1,6 @@
 ﻿#region Usings
-
 using Semi.Hsms.Messages;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-
 #endregion
 
 namespace Semi.Hsms.TestSuite
@@ -23,8 +18,8 @@ namespace Semi.Hsms.TestSuite
 			var arr = new List<DataItem>();
 			arr.Add( new I2( 32 ) );
 			arr.Add( new U2( 2 ) );
-
-			arr.Clear();
+			arr.Add(new A("lena",10));
+			arr.Add(new A("denis",3));
 
 			var message = DataMessage
 					.Builder
@@ -35,34 +30,8 @@ namespace Semi.Hsms.TestSuite
 					.Build();
 
 			var copy = message.Items as List<DataItem>;
-			copy.Clear();
-
-			var st1 = new Student() { Name = "denis" };
-
-			var col1 = new List<Student>();
-			var col2 = new List<Student>();
-
-			col1.Add( st1.Copy() );
-			col2.Add( st1.Copy() );
-
-			st1.Name = "lena";
-
-			col1.Clear();
 		}
 
 		#endregion
-	}
-
-	public class Student 
-	{
-		public string Name { get; set; }
-
-		public Student Copy() 
-		{
-			return new Student()
-			{
-				Name = Name
-			};
-		}
 	}
 }
