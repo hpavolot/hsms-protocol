@@ -1,76 +1,75 @@
 ﻿namespace Semi.Hsms.Messages
 {
-    public class StringItem : DataItem
-    {
-        #region Class members
+	/// <summary>
+	/// 
+	/// </summary>
+	public class StringItem : DataItem
+	{
+		#region Class members
+		/// <summary>
+		/// 
+		/// </summary>
+		private string _value;
+		/// <summary>
+		/// 
+		/// </summary>
+		private int _length;
+		#endregion
 
-        /// <summary>
-        /// 
-        /// </summary>
-        private string _value;
+		#region Class properties
 
-        /// <summary>
-        /// 
-        /// </summary>
-        private int _length;
+		/// <summary>
+		/// 
+		/// </summary>
+		public string Value => _value;
 
-        #endregion
+		/// <summary>
+		/// 
+		/// </summary>
+		public int Length => _length;
 
-        #region Class properties
+		#endregion
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public string Value => _value;
+		#region Class initializations
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="length"></param>
+		public StringItem( string value, int length )
+		{
+			_value = value.Substring( 0, length );
+			_length = length;
+			_format = Format.A;
+		}
+		#endregion
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public int Length => _length;
+		#region Class public methods
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public override string ToString()
+		{
+			return $"[{_format.ToString()}] {Value}";
+		}
+		#endregion
+	}
 
-        #endregion
-
-        #region Class initializations
-
-        public StringItem(string value, int length)
-        {
-            _value = value.Substring(0, length);
-            _length = length;
-            _format = Format.A;
-        }
-
-        #endregion
-
-        #region Class public methods
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            return $"[{_format.ToString()}] {Value}";
-        }
-
-        #endregion
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public class A : StringItem
-    {
-        #region Class initializations
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name=""></param>
-        public A(string v, int len)
-            : base(v, len)
-        {
-        }
-
-        #endregion
-    }
+	/// <summary>
+	/// 
+	/// </summary>
+	public class A : StringItem
+	{
+		#region Class initializations
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name=""></param>
+		public A( string v, int len )
+				: base( v, len )
+		{
+		}
+		#endregion
+	}
 }

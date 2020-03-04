@@ -10,29 +10,59 @@ using System.Net;
 
 namespace Semi.Hsms.TestSuite
 {
-    class Program
-    {
-        #region Class public methods
+	class Program
+	{
+		#region Class public methods
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="args"></param>
-        static void Main(string[] args)
-        {
-            var message = DataMessage
-                .Builder
-                .Stream(1)
-                .Function(5)
-                .Device(1)
-                .Context(522555)
-                .DataItems(
-                    new I2(32),
-                    new U2(2),
-                    new A("Lena", 3))
-                .Build();
-        }
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="args"></param>
+		static void Main( string [] args )
+		{
+			var arr = new List<DataItem>();
+			arr.Add( new I2( 32 ) );
+			arr.Add( new U2( 2 ) );
 
-        #endregion
-    }
+			arr.Clear();
+
+			var message = DataMessage
+					.Builder
+					.Stream( 1 )
+					.Function( 5 )
+					.Context( 522555 )
+					.Items( arr )
+					.Build();
+
+			var copy = message.Items as List<DataItem>;
+			copy.Clear();
+
+			var st1 = new Student() { Name = "denis" };
+
+			var col1 = new List<Student>();
+			var col2 = new List<Student>();
+
+			col1.Add( st1.Copy() );
+			col2.Add( st1.Copy() );
+
+			st1.Name = "lena";
+
+			col1.Clear();
+		}
+
+		#endregion
+	}
+
+	public class Student 
+	{
+		public string Name { get; set; }
+
+		public Student Copy() 
+		{
+			return new Student()
+			{
+				Name = Name
+			};
+		}
+	}
 }

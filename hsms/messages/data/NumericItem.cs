@@ -44,9 +44,6 @@ namespace Semi.Hsms.Messages
 			return $"[{_format.ToString()}] {Value}";
 		}
 		#endregion
-
-		#region Class internal structs
-		#endregion
 	}
 
 	/// <summary>
