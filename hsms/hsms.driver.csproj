@@ -59,6 +59,7 @@
     <Compile Include="messages\control\SelectReq.cs" />
     <Compile Include="enums\SelectStatus.cs" />
     <Compile Include="messages\control\SeparateReq.cs" />
+    <Compile Include="messages\data\DataList.cs" />
     <Compile Include="messages\data\NumericItem.cs" />
     <Compile Include="messages\data\DataItem.cs" />
     <Compile Include="messages\data\Format.cs" />

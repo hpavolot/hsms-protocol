@@ -24,7 +24,7 @@ namespace Semi.Hsms.Messages
 		public T Value => _value;
 		#endregion
 
-		#region Class initializations
+		#region Class initialization
 		/// <summary>
 		/// 
 		/// </summary>
@@ -35,6 +35,9 @@ namespace Semi.Hsms.Messages
 			_value = value;
 			_format = f;
 		}
+		#endregion
+		
+		#region Class public methods
 		/// <summary>
 		/// 
 		/// </summary>
@@ -73,6 +76,8 @@ namespace Semi.Hsms.Messages
 		}
 		#endregion
 	}
+	
+	#region Class childs
 	/// <summary>
 	/// 
 	/// </summary>
@@ -233,4 +238,5 @@ namespace Semi.Hsms.Messages
 		}
 		#endregion
 	}
+	#endregion
 }
