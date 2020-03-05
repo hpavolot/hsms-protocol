@@ -15,21 +15,38 @@ namespace Semi.Hsms.TestSuite
 		/// <param name="args"></param>
 		static void Main( string [] args )
 		{
-			var arr = new List<DataItem>();
-			arr.Add( new I2( 32 ) );
-			arr.Add( new U2( 2 ) );
-			arr.Add(new A("lena",10));
-			arr.Add(new A("denis",3));
+			//var arr = new List<DataItem>();
+			//arr.Add( new I2( 32 ) );
+			//arr.Add( new U2( 2 ) );
+			//arr.Add(new A("lena",10));
+			//arr.Add(new A("denis",3));
 
-			var message = DataMessage
-					.Builder
-					.Stream( 1 )
-					.Function( 5 )
-					.Context( 522555 )
-					.Items( arr )
-					.Build();
+			//var item = new DataList(
+			//				new A( "lena", 10 ),
+			//				new A( "denis", 20 ),
+			//				new DataList(
+			//					new A( "mama", 20 ) )	);
 
-			var copy = message.Items as List<DataItem>;
+			//var children = item.Items;
+
+			//var message = DataMessage
+			//		.Builder
+			//		.Stream( 1 )
+			//		.Function( 5 )
+			//		.Context( 522555 )
+			//		.Items(
+			//			new I2( 32 ),
+			//			new U2( 2 ),
+			//			new DataList(
+			//				new A( "lena", 10 ),
+			//				new A( "denis", 20 ),
+			//				new DataList(
+			//					new A( "mama", 20 ))
+			//				)
+			//		)
+			//		.Build();
+
+			//var copy = message.Items as List<DataItem>;
 		}
 
 		#endregion
