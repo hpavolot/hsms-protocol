@@ -1,16 +1,27 @@
 ﻿#region Usings
 using System.Collections.Generic;
+using System.Linq;
 #endregion
 
 namespace Semi.Hsms.Messages
 {
-  public class DataList : DataItem
+  /// <summary>
+  /// 
+  /// </summary>
+  public class ListItem : DataItem
   {
+    #region Class members
+    /// <summary>
+    /// 
+    /// </summary>
+    private List<DataItem> _items;
+    #endregion
+
     #region Class properties
     /// <summary>
     /// 
     /// </summary>
-    public List<DataItem> Items { get; }
+    public IList<DataItem> Items => _items.ToList();
     #endregion
 
     #region Class initializations
@@ -18,14 +29,14 @@ namespace Semi.Hsms.Messages
     /// 
     /// </summary>
     /// <param name="items"></param>
-    public DataList(params DataItem[] items)
+    public ListItem(params DataItem[] items)
     {
       _format = Format.List;
-      Items = new List<DataItem>();
+      _items = new List<DataItem>();
 
       foreach (var item in items)
       {
-        Items.Add(item);
+        _items.Add(item);
       }
     }
     #endregion
@@ -37,9 +48,8 @@ namespace Semi.Hsms.Messages
     /// <returns></returns>
     public override string ToString()
     {
-      return $"[{_format.ToString()}] {Items}";
+      return $"L<{Items.Count}>";
     }
-
     /// <summary>
     /// 
     /// </summary>
@@ -50,14 +60,17 @@ namespace Semi.Hsms.Messages
       if (!base.Equals(obj))
         return false;
 
-      if (!(obj is DataList dl))
+      if (!(obj is ListItem dl))
         return false;
 
       if (Items.Count != dl.Items.Count)
         return false;
 
-      if (Items.Equals(dl.Items))
-        return false;
+      for( int i = 0, len = _items.Count; i < len; ++i )
+      {
+        if( !dl._items [ i ].Equals( _items [ i ] ) )
+          return false;
+      }
 
       return true;
     }
@@ -68,8 +81,10 @@ namespace Semi.Hsms.Messages
     /// <returns></returns>
     public override int GetHashCode()
     {
-      var hash = 17;
-      hash = hash * 23 + Items.GetHashCode();
+      int hash = base.GetHashCode();
+
+      _items.ForEach( x => hash = hash * 23 + x.GetHashCode() );
+
       return hash;
     }
     #endregion

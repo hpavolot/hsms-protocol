@@ -19,11 +19,22 @@ namespace Semi.Hsms.TestSuite
       items.Add(new U2(2));
       items.Add(new A("lena", 10));
       items.Add(new A("denis", 3));
-      items.Add(new DataList(
-        new A("mama", 5),
-        new DataList(
-          new F8(10.56),
-          new A("test", 12))));
+
+      var dataList = new ListItem(
+        new A( "mama", 5 ),
+        new ListItem(
+          new F8( 10.56 ),
+          new A( "test", 12 ) ) );
+
+      var dataList2 = new ListItem(
+      new A( "mama", 5 ),
+      new A( "papa", 5 ) );
+
+      dataList.Equals( dataList2 );
+
+
+
+      items.Add( dataList );
 
       var message = DataMessage
         .Builder
