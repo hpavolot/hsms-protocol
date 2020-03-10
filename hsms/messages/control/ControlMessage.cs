@@ -43,5 +43,44 @@ namespace Semi.Hsms.Messages
 
 		}
 		#endregion
+
+		#region Class public methods
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public override bool Equals(object obj)
+		{
+			if (!base.Equals(obj))
+				return false;
+
+			var cm = obj as ControlMessage;
+
+			if (null == cm)
+				return false;
+
+			if (IsPrimary != cm.IsPrimary)
+				return false;
+
+			if (IsReplyRequired != cm.IsReplyRequired)
+				return false;
+
+			return true;
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public override int GetHashCode()
+		{
+			int hash = base.GetHashCode();
+
+			hash = hash * 23 + IsPrimary.GetHashCode();
+			hash = hash * 23 + IsReplyRequired.GetHashCode();
+
+			return hash;
+		}
+		#endregion
 	}
 }

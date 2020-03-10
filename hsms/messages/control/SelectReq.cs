@@ -1,7 +1,9 @@
 ﻿#region Usings
 #endregion
 
-namespace Semi.Hsms.Messages
+using Semi.Hsms.Messages;
+
+namespace Semi.Hsms.messages.control
 {
     public class SelectReq : ControlMessage
     {

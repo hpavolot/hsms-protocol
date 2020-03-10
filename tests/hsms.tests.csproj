@@ -49,6 +49,13 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="messages\control\DeselectReq.cs" />
+    <Compile Include="messages\control\DeselectRsp .cs" />
+    <Compile Include="messages\control\LinkTestRsp.cs" />
+    <Compile Include="messages\control\LinkTestReq.cs" />
+    <Compile Include="messages\control\RejectReq.cs" />
+    <Compile Include="messages\control\SeparateReq.cs" />
+    <Compile Include="messages\control\SelectRsp.cs" />
     <Compile Include="messages\control\SelectReq.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
