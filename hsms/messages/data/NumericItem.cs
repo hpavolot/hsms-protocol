@@ -59,7 +59,7 @@ namespace Semi.Hsms.Messages
 			if( !( obj is NumericItem<T> ni ) )
 				return false;
 
-			if( Value.Equals( ni.Value ) )
+			if( !Value.Equals( ni.Value ) )
 				return false;
 
 			return true;
@@ -77,7 +77,7 @@ namespace Semi.Hsms.Messages
 		#endregion
 	}
 	
-	#region Class childs
+	#region Class children
 	/// <summary>
 	/// 
 	/// </summary>
