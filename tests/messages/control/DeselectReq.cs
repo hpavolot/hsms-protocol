@@ -1,10 +1,14 @@
-﻿using System;
+﻿#region Usings
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Semi.Hsms.Messages;
-using Semi.Hsms.messages.control;
+#endregion
 
 namespace hsms.tests.messages.control
 {
+    #region Initialization tests
+    /// <summary>
+    /// 
+    /// </summary>
     [TestClass]
     public class DeselectReqTests
     {
@@ -17,38 +21,52 @@ namespace hsms.tests.messages.control
             Assert.IsTrue(deselectReq.Device == 1);
             Assert.IsTrue(deselectReq.Context == 2);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         [TestMethod]
         public void Should_SetIsPrimaryToTrue()
         {
             var deselectReq = new DeselectReq(1, 2);
 
-            Assert.IsTrue(deselectReq.IsPrimary == true);
+            Assert.IsTrue(deselectReq.IsPrimary);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         [TestMethod]
-        public void Should_SetIsReplyRequiredToFalse()
+        public void Should_SetIsReplyRequiredToTrue()
         {
             var deselectReq = new DeselectReq(1, 2);
 
-            Assert.IsTrue(deselectReq.IsReplyRequired == true);
+            Assert.IsTrue(deselectReq.IsReplyRequired);
         }
 
-        [TestMethod]
+		#endregion
+
+		#region Equality tests
+        /// <summary>
+        /// 
+        /// </summary>
+		[TestMethod]
         public void Should_BeEqualIfDeselectReqsEqual()
         {
             var deselectReq = new DeselectReq(1, 2);
             var deselectReq2 = new DeselectReq(1, 2);
             Assert.IsTrue(deselectReq.Equals(deselectReq2));
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         [TestMethod]
         public void Should_FailEqualityForNull()
         {
             var deselectReq = new DeselectReq(1, 2);
             Assert.IsFalse(deselectReq.Equals(null));
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         [TestMethod]
         public void Should_FailEqualityForDifferetObjectTypes()
         {
@@ -56,7 +74,9 @@ namespace hsms.tests.messages.control
             var obj = "test";
             Assert.IsFalse(deselectReq.Equals(obj));
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         [TestMethod]
         public void Should_FailEqualityForDifferentMessageTypes()
         {
@@ -64,7 +84,9 @@ namespace hsms.tests.messages.control
             var deselectRsp = new DeselectRsp(1, 2, 1);
             Assert.IsFalse(deselectReq.Equals(deselectRsp));
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         [TestMethod]
         public void Should_FailEqualityForDifferentDevice()
         {
@@ -72,7 +94,9 @@ namespace hsms.tests.messages.control
             var deselectReq2 = new DeselectReq(1, 1);
             Assert.IsFalse(deselectReq.Equals(deselectReq2));
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         [TestMethod]
         public void Should_FailEqualityForDifferentContext()
         {
@@ -80,6 +104,8 @@ namespace hsms.tests.messages.control
             var deselectReq2 = new DeselectReq(1, 2);
             Assert.IsFalse(deselectReq.Equals(deselectReq2));
         }
+
+        #endregion
     }
 
 }
