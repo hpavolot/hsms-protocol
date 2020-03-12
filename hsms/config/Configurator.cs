@@ -219,7 +219,7 @@ namespace Semi.Hsms.Messages
 			/// <returns></returns>
 			public ConfigurationBuilder T8( ushort t8 )
 			{
-				_t7 = ( t8 < 0 || t8 >= 120 ) ? DEFAULT_T8 : t8;
+				_t8 = ( t8 < 0 || t8 >= 120 ) ? DEFAULT_T8 : t8;
 
 				return this;
 			}

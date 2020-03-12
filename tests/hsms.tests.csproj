@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="configurator\Configurator.cs" />
     <Compile Include="messages\control\DeselectReq.cs" />
     <Compile Include="messages\control\DeselectRsp .cs" />
     <Compile Include="messages\control\LinkTestRsp.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="messages\control\SeparateReq.cs" />
     <Compile Include="messages\control\SelectRsp.cs" />
     <Compile Include="messages\control\SelectReq.cs" />
+    <Compile Include="messages\data\ListItem.cs" />
     <Compile Include="messages\data\NumericItem-F8.cs" />
     <Compile Include="messages\data\NumericItem-F4.cs" />
     <Compile Include="messages\data\NumericItem-U8.cs" />

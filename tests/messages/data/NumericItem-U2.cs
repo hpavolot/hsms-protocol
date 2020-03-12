@@ -15,7 +15,8 @@ namespace hsms.tests.messages.data
 		[TestMethod]
 		public void Should_CreateCorrecU2Item()
 		{
-			var numericItem = new U2 (1);
+
+			var numericItem = new U2 (2);
 
 			Assert.IsTrue(numericItem.Value == 1);
 			Assert.IsTrue(numericItem.Type == Format.U2);
