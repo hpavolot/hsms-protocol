@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="config\Configurator.cs" />
+    <Compile Include="connections\Connection.cs" />
     <Compile Include="messages\Coder.cs" />
     <Compile Include="messages\control\ControlMessage.cs" />
     <Compile Include="messages\control\DeselectReq.cs" />
@@ -73,7 +74,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="connections\" />
     <Folder Include="log\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
