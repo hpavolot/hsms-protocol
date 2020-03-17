@@ -21,7 +21,7 @@ namespace Semi.Hsms.Messages
 		/// <summary>
 		/// 
 		/// </summary>
-		public IPAddress IpAddress { get; private set; }
+		public IPAddress IP { get; private set; }
 		/// <summary>
 		/// 
 		/// </summary>
@@ -66,7 +66,14 @@ namespace Semi.Hsms.Messages
 		private Configurator()
 		{
 		}
-
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public override string ToString()
+		{
+			return $"{IP}:{Port}";
+		}
 		#endregion
 
 		#region Class internal structs
@@ -172,6 +179,20 @@ namespace Semi.Hsms.Messages
 			/// <summary>
 			/// 
 			/// </summary>
+			/// <param name="ipAddress"></param>
+			/// <returns></returns>
+			public ConfigurationBuilder IP( string ip )
+			{
+				if( IPAddress.TryParse( ip, out IPAddress res ))
+				{
+					_ipAddress = res;
+				}
+
+				return this;
+			}
+			/// <summary>
+			/// 
+			/// </summary>
 			/// <param name="port"></param>
 			/// <returns></returns>
 			public ConfigurationBuilder Port( int port )
@@ -231,7 +252,7 @@ namespace Semi.Hsms.Messages
 			/// <returns></returns>
 			public ConfigurationBuilder Copy( Configurator c )
 			{
-				_ipAddress = c.IpAddress;
+				_ipAddress = c.IP;
 				_port = c.Port;
 				_t3 = c.T3;
 				_t5 = c.T5;
@@ -250,7 +271,7 @@ namespace Semi.Hsms.Messages
 			{
 				var c = new Configurator
 				{
-					IpAddress = _ipAddress,
+					IP = _ipAddress,
 					Port = _port,
 					T3 = _t3,
 					T5 = _t5,

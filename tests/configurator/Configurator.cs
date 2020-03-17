@@ -23,7 +23,7 @@ namespace hsms.tests.configurator
 
 			var configurator = builder.Build();
 
-			Assert.IsTrue(configurator.IpAddress == ipAddress);
+			Assert.IsTrue(configurator.IP == ipAddress);
 		}
 		/// <summary>
 		/// 

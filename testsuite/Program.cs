@@ -1,8 +1,8 @@
 ﻿#region Usings
 using System.Net;
 using static Semi.Hsms.Messages.Configurator;
-using Semi.Hsms.connections;
-using Semi.Hsms.messages.control;
+using System;
+using Semi.Hsms.Connections;
 #endregion
 
 namespace Semi.Hsms.TestSuite
@@ -16,22 +16,32 @@ namespace Semi.Hsms.TestSuite
 		/// <param name="args"></param>
 		static void Main(string[] args)
 		{
-			var ip = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0];
-
 			var config = new ConfigurationBuilder()
-				.IP(ip)
+				.IP( "127.0.0.1" )
 				.Port(11000)
 				.Build();
 
 			var connection = new Connection(config);
 
-			connection.Start();
+			while( true ) 
+			{
+				var cmd = Console.ReadLine();
 
-			var selectReq = new SelectReq(1, 2);
-			connection.Send(selectReq);
+				switch( cmd ) 
+				{
+					case "start":
+						connection.Start();
+						break;
+
+					case "stop":
+						connection.Stop();
+						break;
+
+					case "exit":
+						return;
+				}
+			}
 			
-			connection.Stop();
-
 		}
 		#endregion
 	}

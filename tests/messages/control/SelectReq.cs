@@ -1,6 +1,5 @@
 ﻿#region Usings 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Semi.Hsms.messages.control;
 using Semi.Hsms.Messages;
 #endregion
 
