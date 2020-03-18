@@ -1,8 +1,10 @@
 ﻿#region Usings
 using Semi.Hsms.Messages;
+using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 #endregion
 
@@ -37,12 +39,12 @@ namespace Semi.Hsms.Connections
 		/// 
 		/// </summary>
 		/// <param name="configurator"></param>
-		public Connection( Configurator configurator)
+		public Connection(Configurator configurator)
 		{
 			_config = configurator;
 
-			_connectionTimer = new Timer( s => TryConnect(),
-				null, Timeout.Infinite, Timeout.Infinite );
+			_connectionTimer = new Timer(s => TryConnect(),
+				null, Timeout.Infinite, Timeout.Infinite);
 		}
 		#endregion
 
@@ -59,11 +61,11 @@ namespace Semi.Hsms.Connections
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Stop() 
+		public void Stop()
 		{
 			_bRun = false;
 
-			_connectionTimer.Change( Timeout.Infinite, Timeout.Infinite );
+			_connectionTimer.Change(Timeout.Infinite, Timeout.Infinite);
 		}
 		#endregion
 
@@ -73,46 +75,49 @@ namespace Semi.Hsms.Connections
 		/// </summary>
 		private void TryConnect()
 		{
-			Debug.WriteLine( "trying to connect..." );
+			Debug.WriteLine("trying to connect...");
 
-			var s = new Socket( AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
+			var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-			var ea = new SocketAsyncEventArgs() 
+			var ea = new SocketAsyncEventArgs()
 			{
-				RemoteEndPoint = new IPEndPoint( _config.IP, _config.Port )
+				RemoteEndPoint = new IPEndPoint(_config.IP, _config.Port)
 			};
 
 			ea.Completed += OnConnectionCompleted;
 
 			s.NoDelay = true;
 
-			s.ConnectAsync( ea );
+			s.ConnectAsync(ea);
 		}
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
-		private void OnConnectionCompleted( object sender, SocketAsyncEventArgs e )
+		private void OnConnectionCompleted(object sender, SocketAsyncEventArgs e)
 		{
-			if( !_bRun )
+			if (!_bRun)
 				return;
 
-			if( null != e.ConnectSocket )
+			if (null != e.ConnectSocket)
 			{
 				_socket = e.ConnectSocket;
 
-				Debug.WriteLine( "connected !!!" );
+				Debug.WriteLine("connected !!!");
 
-				Send( new SelectReq( 1, 7 ) );
+				Send(new SelectReq(4, 9));
 
-				//_socket.BeginReceive
+				Receive(_socket);
+				
 			}
-			else 
+			else
 			{
-				_connectionTimer.Change( 1000, Timeout.Infinite );
+				_connectionTimer.Change(1000, Timeout.Infinite);
 			}
 		}
+
+
 		#endregion
 
 		#region Class 'Send' methods
@@ -120,14 +125,58 @@ namespace Semi.Hsms.Connections
 		/// 
 		/// </summary>
 		/// <param name="m"></param>
-		public void Send( Message m ) 
+		public void Send(Message m)
 		{
-			Debug.WriteLine( $"sending: {m.ToString()}" );
+			Debug.WriteLine($"sending: {m.ToString()}");
 
-			var arr = Coder.Encode( m );
+			var arr = Coder.Encode(m);
 
-			_socket.Send( arr );
+			_socket.Send(arr);
 		}
 		#endregion
-	}
+
+		#region Class 'Receive' methods
+		public class StateObject
+		{
+			public Socket workSocket = null;
+			public const int BufferSize = 256;
+			public byte[] buffer = new byte[BufferSize];
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="socket"></param>
+		private void Receive(Socket socket)
+		{
+			StateObject state = new StateObject();
+			state.workSocket = socket;
+
+			socket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+			new AsyncCallback(ReceiveCallback), state);
+		}
+
+		private static void ReceiveCallback(IAsyncResult ar)
+		{
+			StateObject state = (StateObject)ar.AsyncState;
+			Socket socket = state.workSocket;
+
+			int bytesRead = socket.EndReceive(ar);
+
+			var msg = Coder.Decode(state.buffer);
+			Console.WriteLine(msg.ToString());
+
+			for (int i = 0; i < bytesRead; i++)
+			{
+				Console.Write(" " +state.buffer[i]);
+			}
+
+			if (bytesRead > 0)
+			{
+				
+				socket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+					new AsyncCallback(ReceiveCallback), state);
+			}
+		}
+				#endregion
+			}
 }

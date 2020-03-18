@@ -66,68 +66,69 @@ namespace Semi.Hsms.Messages
 			{
 				using( var reader = new BinaryReader( ms ) )
 				{
-					//// SessionId
-					//var device = BitConverter.ToUInt16(
-					//	reader.ReadBytes(2)
-					//	.Reverse().
-					//	ToArray(),
-					//	0);
+					// SessionId
+					//ms.Position = 4;
+					var device = BitConverter.ToUInt16(
+						reader.ReadBytes(2)
+						.Reverse().
+						ToArray(),
+						4);
 
-					//// System bytes
-					//ms.Position = 6;
-					//var context = BitConverter.ToUInt16(
-					//	reader.ReadBytes(4)
-					//	.Reverse().
-					//	ToArray(),
-					//	0);
-					//// SType5
-					//ms.Position = 5;
+					// System bytes
+					ms.Position = 10;
+					var context = BitConverter.ToUInt16(
+						reader.ReadBytes(4)
+						.Reverse().
+						ToArray(),
+						0);
+					// SType5
+					ms.Position = 9;
 
-					//var msgType = (MessageType)reader.ReadByte();
-					//ms.Position = 3;
+					var msgType = (MessageType)reader.ReadByte();
+					ms.Position = 7;
 
-					//switch (msgType)
-					//{
-					//	case MessageType.SelectReq:
-					//		{
-					//			return new SelectReq(device, context);
-					//		}
-					//	case MessageType.SelectRsp:
-					//		{
-					//			var status = reader.ReadByte();
-					//			return new SelectRsp(device, context, status);
-					//		}
-					//	case MessageType.DeselectReq:
-					//		{
-					//			return new DeselectReq(device, context);
-					//		}
-					//	case MessageType.DeselectRsp:
-					//		{
-					//			var status = reader.ReadByte();
-					//			return new DeselectRsp(device, context, status);
-					//		}
-					//	case MessageType.LinktestReq:
-					//		{
-					//			return new LinkTestReq(device, context);
-					//		}
-					//	case MessageType.LinktestRsp:
-					//		{
-					//			return new LinkTestRsp(device, context);
-					//		}
-					//	case MessageType.RejectReq:
-					//		{
-					//			var reason = reader.ReadByte();
-					//			return new RejectReq(device, context, reason);
-					//		}
-					//	case MessageType.SeparateReq:
-					//		{
-					//			return new SeparateReq(device, context);
-					//		}
-					//	default:
-					//		return null;
+					switch (msgType)
+					{
+						case MessageType.SelectReq:
+							{
+								return new SelectReq(device, context);
+							}
+						case MessageType.SelectRsp:
+							{
+								var status = reader.ReadByte();
+								return new SelectRsp(device, context, status);
+							}
+						case MessageType.DeselectReq:
+							{
+								return new DeselectReq(device, context);
+							}
+						case MessageType.DeselectRsp:
+							{
+								var status = reader.ReadByte();
+								return new DeselectRsp(device, context, status);
+							}
+						case MessageType.LinktestReq:
+							{
+								return new LinkTestReq(context);
+							}
+						case MessageType.LinktestRsp:
+							{
+								return new LinkTestRsp(context);
+							}
+						case MessageType.RejectReq:
+							{
+								var reason = reader.ReadByte();
+								return new RejectReq(device, context, reason);
+							}
+						case MessageType.SeparateReq:
+							{
+								return new SeparateReq(device, context);
+							}
+						default:
+							return null;
 
 
-					//}
+					}
 				}
 			}
 
