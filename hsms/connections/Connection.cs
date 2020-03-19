@@ -108,7 +108,7 @@ namespace Semi.Hsms.Connections
 
 				Send(new SelectReq(4, 9));
 
-				Receive(_socket);
+				BeginRecv();
 				
 			}
 			else
@@ -136,47 +136,96 @@ namespace Semi.Hsms.Connections
 		#endregion
 
 		#region Class 'Receive' methods
-		public class StateObject
-		{
-			public Socket workSocket = null;
-			public const int BufferSize = 256;
-			public byte[] buffer = new byte[BufferSize];
-		}
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="socket"></param>
-		private void Receive(Socket socket)
+		private void BeginRecv()
 		{
-			StateObject state = new StateObject();
-			state.workSocket = socket;
+			//StateObject state = new StateObject();
+			//state.workSocket = socket;
 
-			socket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-			new AsyncCallback(ReceiveCallback), state);
+			var buffer = new byte [ Coder.MESSAGE_PREFIX_LEN ];
+
+			_socket.BeginReceive( buffer, 0, buffer.Length, 
+				 SocketFlags.None, OnRecv, buffer );
 		}
-
-		private static void ReceiveCallback(IAsyncResult ar)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="ar"></param>
+		private void OnRecv( IAsyncResult ar)
 		{
-			StateObject state = (StateObject)ar.AsyncState;
-			Socket socket = state.workSocket;
-
-			int bytesRead = socket.EndReceive(ar);
-
-			var msg = Coder.Decode(state.buffer);
-			Console.WriteLine(msg.ToString());
-
-			for (int i = 0; i < bytesRead; i++)
+			try
 			{
-				Console.Write(" " +state.buffer[i]);
+				var buffer = CompleteRecv( ar );
+
+				var m = Coder.Decode( buffer );
+
+				BeginRecv();
+			}
+			catch//( Exception e )
+			{
+			}
+			finally 
+			{
+
 			}
 
-			if (bytesRead > 0)
-			{
-				
-				socket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-					new AsyncCallback(ReceiveCallback), state);
-			}
+
+
+
+			//var msg = Coder.Decode(state.buffer);
+			//Console.WriteLine(msg.ToString());
+
+			//for (int i = 0; i < bytesRead; i++)
+			//{
+			//	Console.Write(" " +state.buffer[i]);
+			//}
+
+			//if (bytesRead > 0)
+			//{
+
+			//	//socket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+			//	//	new AsyncCallback(ReceiveCallback), state);
+			//}
 		}
-				#endregion
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="ar"></param>
+		protected virtual byte [] CompleteRecv( IAsyncResult ar )
+		{
+			int count = _socket.EndReceive( ar );
+
+			if( count != Coder.MESSAGE_PREFIX_LEN )
+				return null;
+
+			var prefix = ar.AsyncState as byte [];
+			Array.Reverse( prefix );
+			var len = BitConverter.ToInt32( prefix, 0 );
+
+			var buffer = new byte [ len ];
+
+			int iBytesToReadLeft = len;
+			int iOffset = 0;
+
+			while( iBytesToReadLeft > 0 )
+			{
+				int iRecvCount = _socket.Receive( buffer, iOffset, iBytesToReadLeft, SocketFlags.None );
+
+				if( 0 == iRecvCount )
+					break;
+
+				iBytesToReadLeft -= iRecvCount;
+				iOffset += iRecvCount;
 			}
+
+			if( iBytesToReadLeft > 0 )
+				throw new Exception( "invalid message length" );
+
+			return buffer;
+		}
+		#endregion
+	}
 }

@@ -23,6 +23,8 @@ namespace Semi.Hsms.TestSuite
 
 			var connection = new Connection(config);
 
+			connection.Start();
+
 			while( true ) 
 			{
 				var cmd = Console.ReadLine();
