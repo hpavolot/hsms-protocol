@@ -3,6 +3,7 @@ using System.Net;
 using static Semi.Hsms.Messages.Configurator;
 using System;
 using Semi.Hsms.Connections;
+using Semi.Hsms.Messages;
 #endregion
 
 namespace Semi.Hsms.TestSuite
@@ -23,7 +24,23 @@ namespace Semi.Hsms.TestSuite
 
 			var connection = new Connection(config);
 
+			connection.Connected += ( s, ea ) => 
+			{
+				var m = DataMessage
+					.Builder
+					.Device( 1 )
+					.Context( 12 )
+					.Stream( 5 )
+					.Function( 1 )
+					.Build();
+
+				connection.Send( m );
+
+			};
+
 			connection.Start();
+
+			//connection.Send( null );
 
 			while( true ) 
 			{
@@ -45,6 +62,8 @@ namespace Semi.Hsms.TestSuite
 			}
 			
 		}
+
+	
 		#endregion
 	}
 }

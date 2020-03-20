@@ -19,6 +19,10 @@ namespace Semi.Hsms.Connections
 		/// <summary>
 		/// 
 		/// </summary>
+		private State _state;
+		/// <summary>
+		/// 
+		/// </summary>
 		private Configurator _config;
 		/// <summary>
 		/// 
@@ -32,6 +36,17 @@ namespace Semi.Hsms.Connections
 		/// 
 		/// </summary>
 		private Socket _socket;
+		#endregion
+
+		#region Class events
+		/// <summary>
+		/// 
+		/// </summary>
+		public event EventHandler Connected;
+		/// <summary>
+		/// 
+		/// </summary>
+		//public event EventHandler Disconnected;
 		#endregion
 
 		#region Class initialization
@@ -104,9 +119,11 @@ namespace Semi.Hsms.Connections
 			{
 				_socket = e.ConnectSocket;
 
+				_state = State.ConnectedNotSelected;
+
 				Debug.WriteLine("connected !!!");
 
-				Send(new SelectReq(4, 9));
+				Send(new SelectReq(1, 9));
 
 				BeginRecv();
 				
@@ -116,8 +133,6 @@ namespace Semi.Hsms.Connections
 				_connectionTimer.Change(1000, Timeout.Infinite);
 			}
 		}
-
-
 		#endregion
 
 		#region Class 'Send' methods
@@ -162,6 +177,8 @@ namespace Semi.Hsms.Connections
 
 				var m = Coder.Decode( buffer );
 
+				AnalyzeRecv( m );
+
 				BeginRecv();
 			}
 			catch//( Exception e )
@@ -171,24 +188,6 @@ namespace Semi.Hsms.Connections
 			{
 
 			}
-
-
-
-
-			//var msg = Coder.Decode(state.buffer);
-			//Console.WriteLine(msg.ToString());
-
-			//for (int i = 0; i < bytesRead; i++)
-			//{
-			//	Console.Write(" " +state.buffer[i]);
-			//}
-
-			//if (bytesRead > 0)
-			//{
-
-			//	//socket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-			//	//	new AsyncCallback(ReceiveCallback), state);
-			//}
 		}
 		/// <summary>
 		/// 
@@ -225,6 +224,52 @@ namespace Semi.Hsms.Connections
 				throw new Exception( "invalid message length" );
 
 			return buffer;
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="message"></param>
+		protected virtual void AnalyzeRecv( Message m )
+		{
+			switch( m.Type ) 
+			{
+				case MessageType.SelectRsp:
+					HandleSelectRsp( m as SelectRsp );
+					break;
+			}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="m"></param>
+		private void HandleSelectRsp( SelectRsp m ) 
+		{
+			_state = State.ConnectedSelected;
+
+			Connected?.Invoke( this, EventArgs.Empty );
+		}
+		#endregion
+
+		#region Class internal structs
+		/// <summary>
+		/// 
+		/// </summary>
+		internal enum State
+		{
+			#region Class properties
+			/// <summary>
+			/// 
+			/// </summary>
+			NotConnected,
+			/// <summary>
+			/// 
+			/// </summary>
+			ConnectedNotSelected,
+			/// <summary>
+			/// 
+			/// </summary>
+			ConnectedSelected,
+			#endregion
 		}
 		#endregion
 	}
