@@ -181,8 +181,9 @@ namespace Semi.Hsms.Connections
 
 				BeginRecv();
 			}
-			catch//( Exception e )
+			catch( Exception e )
 			{
+				Debug.WriteLine(e);
 			}
 			finally 
 			{

@@ -4,6 +4,7 @@ using static Semi.Hsms.Messages.Configurator;
 using System;
 using Semi.Hsms.Connections;
 using Semi.Hsms.Messages;
+using System.Collections.Generic;
 #endregion
 
 namespace Semi.Hsms.TestSuite
@@ -31,11 +32,15 @@ namespace Semi.Hsms.TestSuite
 					.Device( 1 )
 					.Context( 12 )
 					.Stream( 5 )
-					.Function( 1 )
+					.Function( 3 )
+					.Items(
+					 new A ("test",4),
+					 new I1(8),
+					 new ListItem(
+						 new I2(7)))
 					.Build();
 
 				connection.Send( m );
-
 			};
 
 			connection.Start();
