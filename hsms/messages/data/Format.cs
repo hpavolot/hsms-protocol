@@ -66,5 +66,5 @@ namespace Semi.Hsms.Messages
         /// </summary>
         U1 = 164
         #endregion
-    }
+    }    
 }

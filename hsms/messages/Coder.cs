@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Xml;
 #endregion
 
@@ -56,7 +57,7 @@ namespace Semi.Hsms.Messages
 					ms.WriteBody(m);
 
 				}
-				
+
 				msgBytes = ms.PrependLengthBytes();
 			}
 
@@ -231,110 +232,173 @@ namespace Semi.Hsms.Messages
 
 			if (null == dm)
 				return;
-			else 
-			{ 
+			else
+			{
 				ms.WriteDataItems(dm.Items);
 			}
-		}			
+		}
 		public static void WriteDataItems(this MemoryStream ms, IEnumerable<DataItem> dataItems)
 		{
 			using (var writer = new BinaryWriter(ms))
 			{
-				//List 
-				writer.Write((sbyte)Format.List);
-
-				//Number of Elements in the list
-				writer.Write((byte)dataItems.Count());
-
 				foreach (var item in dataItems)
 				{
-					switch (item.Type)
+					var type = item.Type;
+
+					if (type.IsNumeric())
 					{
-						case Format.List:
-							var sublist = item as ListItem;
-							ms.WriteDataItems(sublist.Items);
-							break;
+						writer.WriteNumericItem(item);
+					}
 
-						case Format.A:
-							writer.Write((byte)Format.A);
-							var si = item as StringItem;
-							//writer.Write((byte)si.Length);
-							writer.Write(si.Value);
-							break;
+					if (type.IsString())
+					{
+						writer.WriteStringItem(item);
+					}
 
-						case Format.I1:
-							writer.Write((byte)Format.I1);
-							var i1 = item as NumericItem<sbyte>;
-							writer.Write((byte) 1);
-							writer.Write(i1.Value);
-							break;
+					if (type.IsList())
+					{
+						writer.WriteByte((byte)type | 1);
+						writer.WriteByte(dataItems.Count());
 
-						case Format.I2:
-							writer.Write((byte)Format.I2);
-							var i2 = item as NumericItem<short>;
-							writer.Write((byte) 2);
-							writer.Write((byte)i2.Value);
-							break;
-
-						case Format.I4:
-							writer.Write((byte)Format.I4);
-							var i4 = item as NumericItem<int>;
-							writer.Write((byte) 4);
-							writer.Write(i4.Value);
-							break;
-
-						case Format.I8:
-							writer.Write((byte)Format.I8);
-							var i8 = item as NumericItem<long>;
-							writer.Write((byte) 8);
-							writer.Write(i8.Value);
-							break;
-
-						case Format.F4:
-							writer.Write((byte)Format.F4);
-							var f4 = item as NumericItem<float>;
-							writer.Write((byte) 4);
-							writer.Write(f4.Value);
-							break;
-
-						case Format.F8:
-							writer.Write((byte)Format.F8);
-							var f8 = item as NumericItem<double>;
-							writer.Write((byte) 8);
-							writer.Write((byte)f8.Value);
-							break;
-
-						case Format.U1:
-							writer.Write((byte)Format.U1);
-							var u1 = item as NumericItem<byte>;
-							writer.Write((byte) 1);
-							writer.Write(u1.Value);
-							break;
-
-						case Format.U2:
-							writer.Write((byte)Format.U2);
-							var u2 = item as NumericItem<ushort>;
-							writer.Write((byte)2);
-							writer.Write((byte)u2.Value);
-							break;
-
-						case Format.U4:
-							writer.Write((byte)Format.U4);
-							var u4 = item as NumericItem<uint>;
-							writer.Write((byte) 4);
-							writer.Write(u4.Value);
-							break;
-
-						case Format.U8:
-							writer.Write((byte)Format.U8);
-							var u8 = item as NumericItem<ulong>;
-							writer.Write((byte)8);
-							writer.Write(u8.Value);
-							break;
+						var sublist = item as ListItem;
+						ms.WriteDataItems(sublist.Items);
 					}
 				}
 			}
 		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="item"></param>
+		private static void WriteStringItem(this BinaryWriter writer, DataItem item)
+		{
+
+			var si = item as StringItem;
+			var len = si.Length;
+
+			var numOfBytes = (byte)(len < byte.MaxValue ? 1 : (len > byte.MaxValue && len < ushort.MaxValue ? 2 : 3));
+
+			var itemHeader = (byte)item.Type | numOfBytes;
+
+			writer.WriteByte(itemHeader);
+			writer.WriteByte(len);
+
+			writer.Write(Encoding.ASCII
+				.GetBytes(si.Value)
+				.Reverse()
+				.ToArray());
+
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="item"></param>
+		private static void WriteNumericItem(this BinaryWriter writer, DataItem item)
+		{
+			writer.WriteByte((byte)item.Type | 1);
+
+			switch (item.Type)
+			{
+				case Format.I1:
+					var i1 = item as NumericItem<sbyte>;
+					writer.WriteByte(1);
+					writer.Write(BitConverter
+						.GetBytes(i1.Value)
+						.Reverse()
+						.ToArray());
+					break;
+
+				case Format.I2:
+					var i2 = item as NumericItem<short>;
+					writer.WriteByte(2);
+					writer.Write(BitConverter
+						.GetBytes(i2.Value)
+						.Reverse()
+						.ToArray());
+					break;
+
+				case Format.I4:
+					var i4 = item as NumericItem<int>;
+					writer.WriteByte(4);
+					writer.Write(BitConverter
+						.GetBytes(i4.Value)
+						.Reverse()
+						.ToArray());
+					break;
+
+				case Format.I8:
+					var i8 = item as NumericItem<long>;
+					writer.WriteByte(8);
+
+					writer.Write(BitConverter
+						.GetBytes(i8.Value)
+						.Reverse()
+						.ToArray());
+					break;
+
+				case Format.F4:
+					var f4 = item as NumericItem<float>;
+					writer.WriteByte(4);
+					writer.Write(BitConverter
+						.GetBytes(f4.Value)
+						.Reverse()
+						.ToArray());
+					break;
+
+				case Format.F8:
+					var f8 = item as NumericItem<double>;
+					writer.WriteByte(8);
+					writer.Write(BitConverter
+						.GetBytes(f8.Value)
+						.Reverse()
+						.ToArray());
+					break;
+
+				case Format.U1:
+					var u1 = item as NumericItem<byte>;
+					writer.WriteByte(1);
+					writer.Write(BitConverter
+						.GetBytes(u1.Value)
+						.Reverse()
+						.ToArray());
+					break;
+
+				case Format.U2:
+					var u2 = item as NumericItem<ushort>;
+					writer.WriteByte(2);
+					writer.Write(BitConverter
+						.GetBytes(u2.Value)
+						.Reverse()
+						.ToArray());
+					break;
+
+				case Format.U4:
+					var u4 = item as NumericItem<uint>;
+					writer.WriteByte(4);
+					writer.Write(BitConverter
+						.GetBytes(u4.Value)
+						.Reverse()
+						.ToArray());
+					break;
+
+				case Format.U8:
+					var u8 = item as NumericItem<ulong>;
+					writer.WriteByte(8);
+					writer.Write(BitConverter
+						.GetBytes(u8.Value)
+						.Reverse()
+						.ToArray());
+					break;
+			}
+		}
+		private static void WriteByte(this BinaryWriter writer, int v)
+		{
+			writer.Write((byte)v);
+			;
+		}
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -357,5 +421,71 @@ namespace Semi.Hsms.Messages
 			return arrFinal;
 		}
 		#endregion
+	}
+
+	internal static class FormaExt
+	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="format"></param>
+		/// <returns></returns>
+		public static bool IsString(this Format format)
+		{
+			return format == Format.A;
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="format"></param>
+		/// <returns></returns>
+		public static bool IsList(this Format format)
+		{
+			return format == Format.List;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="format"></param>
+		/// <returns></returns>
+		public static bool IsNumeric(this Format format)
+		{
+			switch (format)
+			{
+				case Format.I1:
+					return true;
+
+				case Format.I2:
+					return true;
+
+				case Format.I4:
+					return true;
+
+				case Format.I8:
+					return true;
+
+				case Format.F4:
+					return true;
+
+				case Format.F8:
+					return true;
+
+				case Format.U1:
+					return true;
+
+				case Format.U2:
+					return true;
+
+				case Format.U4:
+					return true;
+
+				case Format.U8:
+					return true;
+
+				default:
+					return false;
+			}
+		}
 	}
 }

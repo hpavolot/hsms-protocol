@@ -35,7 +35,7 @@ namespace Semi.Hsms.TestSuite
 					.Function( 3 )
 					.Items(
 					 new A ("test",4),
-					 new I1(8),
+					 new I8(18),
 					 new ListItem(
 						 new I2(7)))
 					.Build();
