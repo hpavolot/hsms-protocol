@@ -34,10 +34,7 @@ namespace Semi.Hsms.Messages
       _format = Format.List;
       _items = new List<DataItem>();
 
-      foreach (var item in items)
-      {
-        _items.Add(item);
-      }
+      _items.AddRange( items );
     }
     #endregion
 
@@ -74,7 +71,6 @@ namespace Semi.Hsms.Messages
 
       return true;
     }
-
     /// <summary>
     /// 
     /// </summary>

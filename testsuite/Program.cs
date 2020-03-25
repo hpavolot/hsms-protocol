@@ -18,6 +18,24 @@ namespace Semi.Hsms.TestSuite
 		/// <param name="args"></param>
 		static void Main(string[] args)
 		{
+			byte res = 0;
+			byte day = 9;
+			res = ( byte )( res | day );
+
+			res = ( byte )( res << 1 );
+			res |= 1;
+
+			var female = res & 1;
+			var dayRes = res >> 1;
+
+
+
+
+
+
+
+
+
 			var config = new ConfigurationBuilder()
 				.IP( "127.0.0.1" )
 				.Port(11000)
@@ -34,10 +52,9 @@ namespace Semi.Hsms.TestSuite
 					.Stream( 5 )
 					.Function( 3 )
 					.Items(
-					 new A ("test",4),
-					 new I8(18),
-					 new ListItem(
-						 new I2(7)))
+						new A( "lena", 10 ),
+						new U2( 43 ),
+						new U4( 200 ))
 					.Build();
 
 				connection.Send( m );

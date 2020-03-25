@@ -141,6 +141,7 @@ namespace Semi.Hsms.Messages
 		}
 		#endregion
 	}
+
 	/// <summary>
 	/// 
 	/// </summary>
@@ -226,7 +227,7 @@ namespace Semi.Hsms.Messages
 		/// 
 		/// </summary>
 		/// <param name="writer"></param>
-		public static void WriteBody(this MemoryStream ms, Message m)
+		public static void WriteBody( this MemoryStream ms, Message m)
 		{
 			var dm = m as DataMessage;
 
@@ -237,6 +238,11 @@ namespace Semi.Hsms.Messages
 				ms.WriteDataItems(dm.Items);
 			}
 		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="ms"></param>
+		/// <param name="dataItems"></param>
 		public static void WriteDataItems(this MemoryStream ms, IEnumerable<DataItem> dataItems)
 		{
 			using (var writer = new BinaryWriter(ms))
@@ -261,6 +267,7 @@ namespace Semi.Hsms.Messages
 						writer.WriteByte(dataItems.Count());
 
 						var sublist = item as ListItem;
+
 						ms.WriteDataItems(sublist.Items);
 					}
 				}
@@ -273,132 +280,68 @@ namespace Semi.Hsms.Messages
 		/// <param name="item"></param>
 		private static void WriteStringItem(this BinaryWriter writer, DataItem item)
 		{
-
 			var si = item as StringItem;
 			var len = si.Length;
 
-			var numOfBytes = (byte)(len < byte.MaxValue ? 1 : (len > byte.MaxValue && len < ushort.MaxValue ? 2 : 3));
+			byte btNoLenBytes = ( byte )( ( len <= byte.MaxValue ) ? 1 : ( len <= ushort.MaxValue ) ? 2 : 3 );
 
-			var itemHeader = (byte)item.Type | numOfBytes;
+			var btFormatByte = ( byte )item.Type | btNoLenBytes;
+			writer.WriteByte( btFormatByte );
 
-			writer.WriteByte(itemHeader);
-			writer.WriteByte(len);
+			writer.WriteByte( len ); // todo
 
-			writer.Write(Encoding.ASCII
-				.GetBytes(si.Value)
-				.Reverse()
-				.ToArray());
-
+			writer.Write( Encoding.ASCII.GetBytes( si.Value ) );
 		}
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="writer"></param>
 		/// <param name="item"></param>
-		private static void WriteNumericItem(this BinaryWriter writer, DataItem item)
+		private static void WriteNumericItem(this BinaryWriter w, DataItem item)
 		{
-			writer.WriteByte((byte)item.Type | 1);
+			w.WriteByte( ( byte )item.Type | 1);
 
-			switch (item.Type)
-			{
-				case Format.I1:
-					var i1 = item as NumericItem<sbyte>;
-					writer.WriteByte(1);
-					writer.Write(BitConverter
-						.GetBytes(i1.Value)
-						.Reverse()
-						.ToArray());
-					break;
+			var bytes = GetBytes( item );
 
-				case Format.I2:
-					var i2 = item as NumericItem<short>;
-					writer.WriteByte(2);
-					writer.Write(BitConverter
-						.GetBytes(i2.Value)
-						.Reverse()
-						.ToArray());
-					break;
+			w.WriteByte( bytes.Length );
 
-				case Format.I4:
-					var i4 = item as NumericItem<int>;
-					writer.WriteByte(4);
-					writer.Write(BitConverter
-						.GetBytes(i4.Value)
-						.Reverse()
-						.ToArray());
-					break;
-
-				case Format.I8:
-					var i8 = item as NumericItem<long>;
-					writer.WriteByte(8);
-
-					writer.Write(BitConverter
-						.GetBytes(i8.Value)
-						.Reverse()
-						.ToArray());
-					break;
-
-				case Format.F4:
-					var f4 = item as NumericItem<float>;
-					writer.WriteByte(4);
-					writer.Write(BitConverter
-						.GetBytes(f4.Value)
-						.Reverse()
-						.ToArray());
-					break;
-
-				case Format.F8:
-					var f8 = item as NumericItem<double>;
-					writer.WriteByte(8);
-					writer.Write(BitConverter
-						.GetBytes(f8.Value)
-						.Reverse()
-						.ToArray());
-					break;
-
-				case Format.U1:
-					var u1 = item as NumericItem<byte>;
-					writer.WriteByte(1);
-					writer.Write(BitConverter
-						.GetBytes(u1.Value)
-						.Reverse()
-						.ToArray());
-					break;
-
-				case Format.U2:
-					var u2 = item as NumericItem<ushort>;
-					writer.WriteByte(2);
-					writer.Write(BitConverter
-						.GetBytes(u2.Value)
-						.Reverse()
-						.ToArray());
-					break;
-
-				case Format.U4:
-					var u4 = item as NumericItem<uint>;
-					writer.WriteByte(4);
-					writer.Write(BitConverter
-						.GetBytes(u4.Value)
-						.Reverse()
-						.ToArray());
-					break;
-
-				case Format.U8:
-					var u8 = item as NumericItem<ulong>;
-					writer.WriteByte(8);
-					writer.Write(BitConverter
-						.GetBytes(u8.Value)
-						.Reverse()
-						.ToArray());
-					break;
-			}
+			w.Write( bytes
+				.Reverse()
+				.ToArray() );
 		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="x"></param>
+		/// <returns></returns>
+		private static byte [] GetBytes( DataItem item )
+		{
+			switch( item ) 
+			{
+				case NumericItem<byte> u1:
+					return new byte [] { u1.Value };
+
+				case NumericItem<ushort> u2:
+					return BitConverter.GetBytes( u2.Value );
+
+				case NumericItem<uint> u4:
+					return BitConverter.GetBytes( u4.Value );
+
+				case NumericItem<ulong> u8:
+					return BitConverter.GetBytes( u8.Value );
+			}
+			return null;
+		}
+		/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="writer"></param>
+			/// <param name="v"></param>
 		private static void WriteByte(this BinaryWriter writer, int v)
 		{
 			writer.Write((byte)v);
-			;
 		}
-
 		/// <summary>
 		/// 
 		/// </summary>
@@ -421,71 +364,5 @@ namespace Semi.Hsms.Messages
 			return arrFinal;
 		}
 		#endregion
-	}
-
-	internal static class FormaExt
-	{
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="format"></param>
-		/// <returns></returns>
-		public static bool IsString(this Format format)
-		{
-			return format == Format.A;
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="format"></param>
-		/// <returns></returns>
-		public static bool IsList(this Format format)
-		{
-			return format == Format.List;
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="format"></param>
-		/// <returns></returns>
-		public static bool IsNumeric(this Format format)
-		{
-			switch (format)
-			{
-				case Format.I1:
-					return true;
-
-				case Format.I2:
-					return true;
-
-				case Format.I4:
-					return true;
-
-				case Format.I8:
-					return true;
-
-				case Format.F4:
-					return true;
-
-				case Format.F8:
-					return true;
-
-				case Format.U1:
-					return true;
-
-				case Format.U2:
-					return true;
-
-				case Format.U4:
-					return true;
-
-				case Format.U8:
-					return true;
-
-				default:
-					return false;
-			}
-		}
 	}
 }
