@@ -5,6 +5,7 @@ using System;
 using Semi.Hsms.Connections;
 using Semi.Hsms.Messages;
 using System.Collections.Generic;
+using Semi.Hsms.messages.data;
 #endregion
 
 namespace Semi.Hsms.TestSuite
@@ -18,24 +19,6 @@ namespace Semi.Hsms.TestSuite
 		/// <param name="args"></param>
 		static void Main(string[] args)
 		{
-			byte res = 0;
-			byte day = 9;
-			res = ( byte )( res | day );
-
-			res = ( byte )( res << 1 );
-			res |= 1;
-
-			var female = res & 1;
-			var dayRes = res >> 1;
-
-
-
-
-
-
-
-
-
 			var config = new ConfigurationBuilder()
 				.IP( "127.0.0.1" )
 				.Port(11000)
@@ -43,18 +26,20 @@ namespace Semi.Hsms.TestSuite
 
 			var connection = new Connection(config);
 
-			connection.Connected += ( s, ea ) => 
+			connection.Connected += ( s, ea ) =>
 			{
 				var m = DataMessage
 					.Builder
-					.Device( 1 )
-					.Context( 12 )
-					.Stream( 5 )
-					.Function( 3 )
-					.Items(
-						new A( "lena", 10 ),
-						new U2( 43 ),
-						new U4( 200 ))
+					.Device(1)
+					.Context(12)
+					.Stream(5)
+					.Function(3)
+					.Items(new ListItem(
+						new Bool(true),
+						new A("lena", 5),
+						new I2(5)),
+						new ListItem(
+							new F4(12.5f)))
 					.Build();
 
 				connection.Send( m );

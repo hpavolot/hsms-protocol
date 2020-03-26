@@ -60,6 +60,7 @@
     <Compile Include="messages\control\SelectReq.cs" />
     <Compile Include="enums\SelectStatus.cs" />
     <Compile Include="messages\control\SeparateReq.cs" />
+    <Compile Include="messages\data\BoolItem.cs" />
     <Compile Include="messages\data\ListItem.cs" />
     <Compile Include="messages\data\NumericItem.cs" />
     <Compile Include="messages\data\DataItem.cs" />

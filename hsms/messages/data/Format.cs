@@ -85,6 +85,15 @@
 		/// </summary>
 		/// <param name="format"></param>
 		/// <returns></returns>
+		public static bool IsBoolean( this Format format )
+		{
+			return format == Format.Bool;
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="format"></param>
+		/// <returns></returns>
 		public static bool IsList( this Format format )
 		{
 			return format == Format.List;

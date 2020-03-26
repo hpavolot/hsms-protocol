@@ -1,4 +1,5 @@
 ﻿#region Usings
+using Semi.Hsms.messages.data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -54,7 +55,7 @@ namespace Semi.Hsms.Messages
 					w.WriteContext(m);
 
 					//Message body
-					ms.WriteBody(m);
+					w.WriteBody(m);
 
 				}
 
@@ -151,10 +152,10 @@ namespace Semi.Hsms.Messages
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="writer"></param>
-		public static void WriteDevice(this BinaryWriter writer, Message m)
+		/// <param name="w"></param>
+		public static void WriteDevice(this BinaryWriter w, Message m)
 		{
-			writer.Write(BitConverter
+			w.Write(BitConverter
 					.GetBytes(m.Device)
 					.Reverse()
 					.ToArray());
@@ -162,10 +163,10 @@ namespace Semi.Hsms.Messages
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="writer"></param>
-		public static void WriteContext(this BinaryWriter writer, Message m)
+		/// <param name="w"></param>
+		public static void WriteContext(this BinaryWriter w, Message m)
 		{
-			writer.Write(BitConverter
+			w.Write(BitConverter
 					.GetBytes(m.Context)
 					.Reverse()
 					.ToArray());
@@ -189,45 +190,45 @@ namespace Semi.Hsms.Messages
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="writer"></param>
-		public static void WriteByte3(this BinaryWriter writer, Message m)
+		/// <param name="w"></param>
+		public static void WriteByte3(this BinaryWriter w, Message m)
 		{
 			switch (m)
 			{
 				case DataMessage dataMsg:
-					writer.Write(dataMsg.Function);
+					w.Write(dataMsg.Function);
 					break;
 
 				case SelectRsp selectRsp:
-					writer.Write(selectRsp.Status);
+					w.Write(selectRsp.Status);
 					break;
 
 				case DeselectRsp deselectRsp:
-					writer.Write(deselectRsp.Status);
+					w.Write(deselectRsp.Status);
 					break;
 
 				case RejectReq rejectReq:
-					writer.Write(rejectReq.Reason);
+					w.Write(rejectReq.Reason);
 					break;
 
 				default:
-					writer.Write(byte.MinValue);
+					w.Write(byte.MinValue);
 					break;
 			}
 		}
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="writer"></param>
-		public static void WriteType(this BinaryWriter writer, Message m)
+		/// <param name="w"></param>
+		public static void WriteType(this BinaryWriter w, Message m)
 		{
-			writer.Write((byte)m.Type);
+			w.Write((byte)m.Type);
 		}
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="writer"></param>
-		public static void WriteBody( this MemoryStream ms, Message m)
+		/// <param name="w"></param>
+		public static void WriteBody(this BinaryWriter w, Message m)
 		{
 			var dm = m as DataMessage;
 
@@ -235,7 +236,7 @@ namespace Semi.Hsms.Messages
 				return;
 			else
 			{
-				ms.WriteDataItems(dm.Items);
+				w.WriteDataItems(dm.Items);
 			}
 		}
 		/// <summary>
@@ -243,71 +244,110 @@ namespace Semi.Hsms.Messages
 		/// </summary>
 		/// <param name="ms"></param>
 		/// <param name="dataItems"></param>
-		public static void WriteDataItems(this MemoryStream ms, IEnumerable<DataItem> dataItems)
+		public static void WriteDataItems(this BinaryWriter w, IEnumerable<DataItem> dataItems)
 		{
-			using (var writer = new BinaryWriter(ms))
+			foreach (var item in dataItems)
 			{
-				foreach (var item in dataItems)
+				var type = item.Type;
+
+				if (type.IsNumeric())
 				{
-					var type = item.Type;
-
-					if (type.IsNumeric())
-					{
-						writer.WriteNumericItem(item);
-					}
-
-					if (type.IsString())
-					{
-						writer.WriteStringItem(item);
-					}
-
-					if (type.IsList())
-					{
-						writer.WriteByte((byte)type | 1);
-						writer.WriteByte(dataItems.Count());
-
-						var sublist = item as ListItem;
-
-						ms.WriteDataItems(sublist.Items);
-					}
+					w.WriteNumericItem(item);
+				}
+				else if (type.IsString())
+				{
+					w.WriteStringItem(item);
+				}
+				else if (type.IsList())
+				{
+					w.WriteListItem(item);
+				}
+				else if (type.IsBoolean())
+				{
+					w.WriteBooleanItem(item);
 				}
 			}
 		}
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="writer"></param>
+		/// <param name="w"></param>
 		/// <param name="item"></param>
-		private static void WriteStringItem(this BinaryWriter writer, DataItem item)
+		private static void WriteListItem(this BinaryWriter w, DataItem item)
 		{
-			var si = item as StringItem;
-			var len = si.Length;
-
-			byte btNoLenBytes = ( byte )( ( len <= byte.MaxValue ) ? 1 : ( len <= ushort.MaxValue ) ? 2 : 3 );
-
-			var btFormatByte = ( byte )item.Type | btNoLenBytes;
-			writer.WriteByte( btFormatByte );
-
-			writer.WriteByte( len ); // todo
-
-			writer.Write( Encoding.ASCII.GetBytes( si.Value ) );
+			var sublist = item as ListItem;
+			w.WriteItemHeader(Format.List, sublist.Items.Count());
+			w.WriteDataItems(sublist.Items);
 		}
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="writer"></param>
+		/// <param name="w"></param>
+		/// <param name="item"></param>
+		private static void WriteStringItem(this BinaryWriter w, DataItem item)
+		{
+			var si = item as StringItem;
+			w.WriteItemHeader(Format.A, si.Length);
+			w.Write(Encoding.ASCII.GetBytes(si.Value));
+		}
+		private static void WriteBooleanItem(this BinaryWriter w, DataItem item)
+		{
+			var bi = item as BoolItem;
+			w.WriteByte((byte)Format.Bool | 1);
+			w.WriteByte(1);
+			w.Write(bi.Value);
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="w"></param>
+		/// <param name="btNoLenBytes"></param>
+		/// <param name="len"></param>
+		private static void WriteItemHeader(this BinaryWriter w, Format type, int len)
+		{
+			byte btNoLenBytes = (byte)((len <= byte.MaxValue) ? 1 : (len <= ushort.MaxValue) ? 2 : 3);
+
+			var btFormatByte = (byte)type | btNoLenBytes;
+			w.WriteByte(btFormatByte);
+
+			switch (btNoLenBytes)
+			{
+				case 1:
+					w.WriteByte(len);
+					break;
+
+				case 2:
+					w.Write(BitConverter
+						.GetBytes(Convert.ToInt16(len))
+						.Reverse()
+						.ToArray());
+					break;
+
+				case 3:
+					w.Write((byte[])BitConverter
+						.GetBytes(len)
+						.Reverse()
+						.Skip(1)
+						.ToArray());
+					break;
+			}
+		}
+		/// <summary>()
+		/// 
+		/// </summary>
+		/// <param name="w"></param>
 		/// <param name="item"></param>
 		private static void WriteNumericItem(this BinaryWriter w, DataItem item)
 		{
-			w.WriteByte( ( byte )item.Type | 1);
+			w.WriteByte((byte)item.Type | 1);
 
-			var bytes = GetBytes( item );
+			var bytes = GetBytes(item);
 
-			w.WriteByte( bytes.Length );
+			w.WriteByte(bytes.Length);
 
-			w.Write( bytes
+			w.Write(bytes
 				.Reverse()
-				.ToArray() );
+				.ToArray());
 		}
 		/// <summary>
 		/// 
@@ -315,32 +355,50 @@ namespace Semi.Hsms.Messages
 		/// <typeparam name="T"></typeparam>
 		/// <param name="x"></param>
 		/// <returns></returns>
-		private static byte [] GetBytes( DataItem item )
+		private static byte[] GetBytes(DataItem item)
 		{
-			switch( item ) 
+			switch (item)
 			{
+				case NumericItem<sbyte> i1:
+					return BitConverter.GetBytes(i1.Value);
+
+				case NumericItem<short> i2:
+					return BitConverter.GetBytes(i2.Value);
+
+				case NumericItem<int> i4:
+					return BitConverter.GetBytes(i4.Value);
+
+				case NumericItem<long> i8:
+					return BitConverter.GetBytes(i8.Value);
+
+				case NumericItem<float> f4:
+					return BitConverter.GetBytes(f4.Value);
+
+				case NumericItem<double> f8:
+					return BitConverter.GetBytes(f8.Value);
+
 				case NumericItem<byte> u1:
-					return new byte [] { u1.Value };
+					return BitConverter.GetBytes(u1.Value);
 
 				case NumericItem<ushort> u2:
-					return BitConverter.GetBytes( u2.Value );
+					return BitConverter.GetBytes(u2.Value);
 
 				case NumericItem<uint> u4:
-					return BitConverter.GetBytes( u4.Value );
+					return BitConverter.GetBytes(u4.Value);
 
 				case NumericItem<ulong> u8:
-					return BitConverter.GetBytes( u8.Value );
+					return BitConverter.GetBytes(u8.Value);
 			}
 			return null;
 		}
 		/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="writer"></param>
-			/// <param name="v"></param>
-		private static void WriteByte(this BinaryWriter writer, int v)
+		/// 
+		/// </summary>
+		/// <param name="w"></param>
+		/// <param name="v"></param>
+		private static void WriteByte(this BinaryWriter w, int v)
 		{
-			writer.Write((byte)v);
+			w.Write((byte)v);
 		}
 		/// <summary>
 		/// 
