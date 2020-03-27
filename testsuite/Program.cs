@@ -1,11 +1,9 @@
 ﻿#region Usings
-using System.Net;
-using static Semi.Hsms.Messages.Configurator;
-using System;
 using Semi.Hsms.Connections;
-using Semi.Hsms.Messages;
-using System.Collections.Generic;
 using Semi.Hsms.messages.data;
+using Semi.Hsms.Messages;
+using System;
+using static Semi.Hsms.Messages.Configurator;
 #endregion
 
 namespace Semi.Hsms.TestSuite

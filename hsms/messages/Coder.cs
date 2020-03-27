@@ -4,9 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Xml;
 #endregion
 
 namespace Semi.Hsms.Messages
@@ -360,7 +358,7 @@ namespace Semi.Hsms.Messages
 			switch (item)
 			{
 				case NumericItem<sbyte> i1:
-					return BitConverter.GetBytes(i1.Value);
+					return new byte[] {(byte) i1.Value };
 
 				case NumericItem<short> i2:
 					return BitConverter.GetBytes(i2.Value);
@@ -378,7 +376,7 @@ namespace Semi.Hsms.Messages
 					return BitConverter.GetBytes(f8.Value);
 
 				case NumericItem<byte> u1:
-					return BitConverter.GetBytes(u1.Value);
+					return new byte[] { u1.Value };
 
 				case NumericItem<ushort> u2:
 					return BitConverter.GetBytes(u2.Value);

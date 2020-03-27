@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Coder\encoder.cs" />
     <Compile Include="configurator\Configurator.cs" />
     <Compile Include="messages\control\DeselectReq.cs" />
     <Compile Include="messages\control\DeselectRsp .cs" />
