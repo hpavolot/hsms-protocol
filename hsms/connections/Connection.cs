@@ -46,7 +46,7 @@ namespace Semi.Hsms.Connections
 		/// <summary>
 		/// 
 		/// </summary>
-		//public event EventHandler Disconnected;
+		public event EventHandler Disconnected;
 		#endregion
 
 		#region Class initialization
@@ -121,26 +121,27 @@ namespace Semi.Hsms.Connections
 
 				_state = State.ConnectedNotSelected;
 
-				Debug.WriteLine("connected !!!");
+				this.Disconnected += Reconnect;
+
+				Console.WriteLine("connected !!!");
 
 				Send(new SelectReq(1, 9));
 
-				BeginRecv();
-				
+				BeginRecv();			
 			}
 			else
 			{
 				_connectionTimer.Change(1000, Timeout.Infinite);
 			}
 		}
-		#endregion
+			#endregion
 
-		#region Class 'Send' methods
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="m"></param>
-		public void Send(Message m)
+			#region Class 'Send' methods
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="m"></param>
+			public void Send(Message m)
 		{
 			Debug.WriteLine($"sending: {m.ToString()}");
 
@@ -157,9 +158,6 @@ namespace Semi.Hsms.Connections
 		/// <param name="socket"></param>
 		private void BeginRecv()
 		{
-			//StateObject state = new StateObject();
-			//state.workSocket = socket;
-
 			var buffer = new byte [ Coder.MESSAGE_PREFIX_LEN ];
 
 			_socket.BeginReceive( buffer, 0, buffer.Length, 
@@ -183,7 +181,9 @@ namespace Semi.Hsms.Connections
 			}
 			catch( Exception e )
 			{
-				Debug.WriteLine(e);
+				Console.WriteLine("Disconnected");
+
+				Disconnected?.Invoke(this, EventArgs.Empty);
 			}
 			finally 
 			{
@@ -248,6 +248,22 @@ namespace Semi.Hsms.Connections
 			_state = State.ConnectedSelected;
 
 			Connected?.Invoke( this, EventArgs.Empty );
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void Reconnect(object sender, EventArgs e)
+		{
+			_bRun = false;
+			_state = State.NotConnected;
+
+			Console.WriteLine("Trying to reconnect...");
+
+			this.Disconnected -= Reconnect;
+
+			this.Start();
 		}
 		#endregion
 
