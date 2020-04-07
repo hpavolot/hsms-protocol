@@ -31,11 +31,19 @@ namespace Semi.Hsms.Connections
 		/// <summary>
 		/// 
 		/// </summary>
+		private Timer _selectionTimer;
+		/// <summary>
+		/// 
+		/// </summary>
 		private bool _bRun;
 		/// <summary>
 		/// 
 		/// </summary>
 		private Socket _socket;
+		/// <summary>
+		/// 
+		/// </summary>
+		private Object _mLock = new Object();
 		#endregion
 
 		#region Class events
@@ -43,10 +51,7 @@ namespace Semi.Hsms.Connections
 		/// 
 		/// </summary>
 		public event EventHandler Connected;
-		/// <summary>
-		/// 
-		/// </summary>
-		public event EventHandler Disconnected;
+
 		#endregion
 
 		#region Class initialization
@@ -60,6 +65,9 @@ namespace Semi.Hsms.Connections
 
 			_connectionTimer = new Timer(s => TryConnect(),
 				null, Timeout.Infinite, Timeout.Infinite);
+
+			_selectionTimer = new Timer(s => Stop(),
+				null, Timeout.Infinite, Timeout.Infinite);
 		}
 		#endregion
 
@@ -69,18 +77,31 @@ namespace Semi.Hsms.Connections
 		/// </summary>
 		public void Start()
 		{
-			_bRun = true;
+			if (_bRun)
+				return;
 
-			TryConnect();
+			lock (_mLock)
+			{
+				_bRun = true;
+
+				TryConnect();
+			}
 		}
 		/// <summary>
 		/// 
 		/// </summary>
 		public void Stop()
 		{
-			_bRun = false;
+			Console.WriteLine("Stopped");
+			if (!_bRun)
+				return;
 
-			_connectionTimer.Change(Timeout.Infinite, Timeout.Infinite);
+			lock (_mLock)
+			{
+				_bRun = false;
+
+				_connectionTimer.Change(Timeout.Infinite, Timeout.Infinite);
+			}
 		}
 		#endregion
 
@@ -121,33 +142,39 @@ namespace Semi.Hsms.Connections
 
 				_state = State.ConnectedNotSelected;
 
-				this.Disconnected += Reconnect;
+				_selectionTimer.Change(_config.T7, Timeout.Infinite);
 
 				Console.WriteLine("connected !!!");
 
 				Send(new SelectReq(1, 9));
 
-				BeginRecv();			
+				BeginRecv();
 			}
 			else
 			{
 				_connectionTimer.Change(1000, Timeout.Infinite);
 			}
 		}
-			#endregion
+		#endregion
 
-			#region Class 'Send' methods
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="m"></param>
-			public void Send(Message m)
+		#region Class 'Send' methods
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="m"></param>
+		public void Send(Message m)
 		{
-			Debug.WriteLine($"sending: {m.ToString()}");
+			if (!_bRun)
+				return;
 
-			var arr = Coder.Encode(m);
+			lock (_mLock)
+			{
+				Debug.WriteLine($"sending: {m.ToString()}");
 
-			_socket.Send(arr);
+				var arr = Coder.Encode(m);
+
+				_socket.Send(arr);
+			}
 		}
 		#endregion
 
@@ -158,71 +185,85 @@ namespace Semi.Hsms.Connections
 		/// <param name="socket"></param>
 		private void BeginRecv()
 		{
-			var buffer = new byte [ Coder.MESSAGE_PREFIX_LEN ];
+			if (!_bRun)
+				return;
 
-			_socket.BeginReceive( buffer, 0, buffer.Length, 
-				 SocketFlags.None, OnRecv, buffer );
+			lock (_mLock)
+			{
+				var buffer = new byte[Coder.MESSAGE_PREFIX_LEN];
+
+				_socket.BeginReceive(buffer, 0, buffer.Length,
+					 SocketFlags.None, OnRecv, buffer);
+			}
 		}
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="ar"></param>
-		private void OnRecv( IAsyncResult ar)
+		private void OnRecv(IAsyncResult ar)
 		{
+			var _bClose = false;
+
 			try
 			{
-				var buffer = CompleteRecv( ar );
+				var buffer = CompleteRecv(ar);
 
-				var m = Coder.Decode( buffer );
+				if (buffer != null)
+				{
+					var m = Coder.Decode(buffer);
 
-				AnalyzeRecv( m );
+					AnalyzeRecv(m);
 
-				BeginRecv();
+					BeginRecv();
+				}
+				else
+				{
+					_bClose = true;
+				}
 			}
-			catch( Exception e )
+			catch (Exception e)
 			{
-				Console.WriteLine("Disconnected");
-
-				Disconnected?.Invoke(this, EventArgs.Empty);
+				_bClose = true;
 			}
-			finally 
+			finally
 			{
-
+				if (_bClose)
+					CloseConnection();
 			}
 		}
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="ar"></param>
-		protected virtual byte [] CompleteRecv( IAsyncResult ar )
+		protected virtual byte[] CompleteRecv(IAsyncResult ar)
 		{
-			int count = _socket.EndReceive( ar );
+			int count = _socket.EndReceive(ar);
 
-			if( count != Coder.MESSAGE_PREFIX_LEN )
+			if (count != Coder.MESSAGE_PREFIX_LEN)
 				return null;
 
-			var prefix = ar.AsyncState as byte [];
-			Array.Reverse( prefix );
-			var len = BitConverter.ToInt32( prefix, 0 );
+			var prefix = ar.AsyncState as byte[];
+			Array.Reverse(prefix);
+			var len = BitConverter.ToInt32(prefix, 0);
 
-			var buffer = new byte [ len ];
+			var buffer = new byte[len];
 
 			int iBytesToReadLeft = len;
 			int iOffset = 0;
 
-			while( iBytesToReadLeft > 0 )
+			while (iBytesToReadLeft > 0)
 			{
-				int iRecvCount = _socket.Receive( buffer, iOffset, iBytesToReadLeft, SocketFlags.None );
+				int iRecvCount = _socket.Receive(buffer, iOffset, iBytesToReadLeft, SocketFlags.None);
 
-				if( 0 == iRecvCount )
+				if (0 == iRecvCount)
 					break;
 
 				iBytesToReadLeft -= iRecvCount;
 				iOffset += iRecvCount;
 			}
 
-			if( iBytesToReadLeft > 0 )
-				throw new Exception( "invalid message length" );
+			if (iBytesToReadLeft > 0)
+				throw new Exception("invalid message length");
 
 			return buffer;
 		}
@@ -230,12 +271,12 @@ namespace Semi.Hsms.Connections
 		/// 
 		/// </summary>
 		/// <param name="message"></param>
-		protected virtual void AnalyzeRecv( Message m )
+		protected virtual void AnalyzeRecv(Message m)
 		{
-			switch( m.Type ) 
+			switch (m.Type)
 			{
 				case MessageType.SelectRsp:
-					HandleSelectRsp( m as SelectRsp );
+					HandleSelectRsp(m as SelectRsp);
 					break;
 			}
 		}
@@ -243,27 +284,33 @@ namespace Semi.Hsms.Connections
 		/// 
 		/// </summary>
 		/// <param name="m"></param>
-		private void HandleSelectRsp( SelectRsp m ) 
+		private void HandleSelectRsp(SelectRsp m)
 		{
 			_state = State.ConnectedSelected;
+			_selectionTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-			Connected?.Invoke( this, EventArgs.Empty );
+			Connected?.Invoke(this, EventArgs.Empty);
 		}
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void Reconnect(object sender, EventArgs e)
+		private void CloseConnection()
 		{
-			_bRun = false;
-			_state = State.NotConnected;
+			if (!_bRun)
+				return;
 
-			Console.WriteLine("Trying to reconnect...");
+			lock (_mLock)
+			{
+				_socket.Close();
 
-			this.Disconnected -= Reconnect;
+				_bRun = false;
 
-			this.Start();
+				_state = State.NotConnected;
+				_selectionTimer.Change(Timeout.Infinite, Timeout.Infinite);
+
+				_connectionTimer.Change(1000, Timeout.Infinite);
+
+			}
 		}
 		#endregion
 
