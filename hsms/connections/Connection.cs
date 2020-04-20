@@ -66,7 +66,7 @@ namespace Semi.Hsms.Connections
 			_connectionTimer = new Timer(s => TryConnect(),
 				null, Timeout.Infinite, Timeout.Infinite);
 
-			_selectionTimer = new Timer(s => Stop(),
+			_selectionTimer = new Timer(s => CloseConnection(),
 				null, Timeout.Infinite, Timeout.Infinite);
 		}
 		#endregion
@@ -77,11 +77,11 @@ namespace Semi.Hsms.Connections
 		/// </summary>
 		public void Start()
 		{
-			if (_bRun)
-				return;
-
 			lock (_mLock)
 			{
+				if (_bRun)
+					return;
+
 				_bRun = true;
 
 				TryConnect();
@@ -93,11 +93,12 @@ namespace Semi.Hsms.Connections
 		public void Stop()
 		{
 			Console.WriteLine("Stopped");
-			if (!_bRun)
-				return;
 
 			lock (_mLock)
 			{
+				if (!_bRun)
+					return;
+
 				_bRun = false;
 
 				_connectionTimer.Change(Timeout.Infinite, Timeout.Infinite);
@@ -111,7 +112,7 @@ namespace Semi.Hsms.Connections
 		/// </summary>
 		private void TryConnect()
 		{
-			Debug.WriteLine("trying to connect...");
+			Console.WriteLine("trying to connect...");
 
 			var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -185,11 +186,11 @@ namespace Semi.Hsms.Connections
 		/// <param name="socket"></param>
 		private void BeginRecv()
 		{
-			if (!_bRun)
-				return;
-
 			lock (_mLock)
 			{
+				if (!_bRun)
+					return;
+
 				var buffer = new byte[Coder.MESSAGE_PREFIX_LEN];
 
 				_socket.BeginReceive(buffer, 0, buffer.Length,
@@ -273,6 +274,9 @@ namespace Semi.Hsms.Connections
 		/// <param name="message"></param>
 		protected virtual void AnalyzeRecv(Message m)
 		{
+			if (m is null)
+				return;
+
 			switch (m.Type)
 			{
 				case MessageType.SelectRsp:
@@ -287,6 +291,8 @@ namespace Semi.Hsms.Connections
 		private void HandleSelectRsp(SelectRsp m)
 		{
 			_state = State.ConnectedSelected;
+
+			Console.WriteLine("Connected Selected");
 			_selectionTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
 			Connected?.Invoke(this, EventArgs.Empty);
@@ -296,20 +302,20 @@ namespace Semi.Hsms.Connections
 		/// </summary>
 		private void CloseConnection()
 		{
-			if (!_bRun)
-				return;
+			Console.WriteLine("Reconnecting");
 
 			lock (_mLock)
 			{
+				if (!_bRun)
+					return;
+
 				_socket.Close();
 
 				_bRun = false;
 
 				_state = State.NotConnected;
-				_selectionTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-				_connectionTimer.Change(1000, Timeout.Infinite);
-
+				Start();
 			}
 		}
 		#endregion
