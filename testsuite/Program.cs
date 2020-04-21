@@ -19,10 +19,11 @@ namespace Semi.Hsms.TestSuite
 		{
 			var config = new ConfigurationBuilder()
 				.IP( "127.0.0.1" )
+				.T5( 3 )
 				.Port(11000)
 				.Build();
 
-			var connection = new Connection(config);
+			var connection = new PassiveConnection( config);
 
 			connection.Connected += ( s, ea ) =>
 			{

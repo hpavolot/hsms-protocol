@@ -13,7 +13,7 @@ namespace Semi.Hsms.Connections
 	/// <summary>
 	/// 
 	/// </summary>
-	public class Connection
+	public class ActiveConnection
 	{
 		#region Class members
 		/// <summary>
@@ -27,11 +27,11 @@ namespace Semi.Hsms.Connections
 		/// <summary>
 		/// 
 		/// </summary>
-		private Timer _connectionTimer;
+		private Timer _timerT5ConnectSeparationTimeout;
 		/// <summary>
 		/// 
 		/// </summary>
-		private Timer _selectionTimer;
+		private Timer _timerT7ConnectionIdleTimeout;
 		/// <summary>
 		/// 
 		/// </summary>
@@ -59,14 +59,14 @@ namespace Semi.Hsms.Connections
 		/// 
 		/// </summary>
 		/// <param name="configurator"></param>
-		public Connection(Configurator configurator)
+		public ActiveConnection(Configurator configurator)
 		{
 			_config = configurator;
 
-			_connectionTimer = new Timer(s => TryConnect(),
+			_timerT5ConnectSeparationTimeout = new Timer(s => TryConnect(),
 				null, Timeout.Infinite, Timeout.Infinite);
 
-			_selectionTimer = new Timer(s => CloseConnection(),
+			_timerT7ConnectionIdleTimeout = new Timer(s => CloseConnection(),
 				null, Timeout.Infinite, Timeout.Infinite);
 		}
 		#endregion
@@ -101,7 +101,28 @@ namespace Semi.Hsms.Connections
 
 				_bRun = false;
 
-				_connectionTimer.Change(Timeout.Infinite, Timeout.Infinite);
+				CloseConnection();
+				//_timerT5ConnectSeparationTimeout.Change(Timeout.Infinite, Timeout.Infinite);
+			}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		private void CloseConnection()
+		{
+			Console.WriteLine( "Reconnecting" );
+
+			lock( _mLock )
+			{
+				_socket.Close();
+				_socket = null;
+
+				_state = State.NotConnected;
+
+				var t5FireTime = ( _bRun ) ? _config.T5 * 1000 : Timeout.Infinite;
+				_timerT5ConnectSeparationTimeout.Change( t5FireTime, Timeout.Infinite );
+
+				_timerT7ConnectionIdleTimeout.Change( Timeout.Infinite, Timeout.Infinite );
 			}
 		}
 		#endregion
@@ -112,6 +133,8 @@ namespace Semi.Hsms.Connections
 		/// </summary>
 		private void TryConnect()
 		{
+			//TODO: add lock !!!
+
 			Console.WriteLine("trying to connect...");
 
 			var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -134,26 +157,31 @@ namespace Semi.Hsms.Connections
 		/// <param name="e"></param>
 		private void OnConnectionCompleted(object sender, SocketAsyncEventArgs e)
 		{
-			if (!_bRun)
-				return;
-
-			if (null != e.ConnectSocket)
+			lock( _mLock ) 
 			{
-				_socket = e.ConnectSocket;
+				if( !_bRun )
+					return;
 
-				_state = State.ConnectedNotSelected;
+				if( null != e.ConnectSocket )
+				{
+					_socket = e.ConnectSocket;
 
-				_selectionTimer.Change(_config.T7, Timeout.Infinite);
+					_state = State.ConnectedNotSelected;
 
-				Console.WriteLine("connected !!!");
+					_timerT7ConnectionIdleTimeout.Change( _config.T7 * 1000, Timeout.Infinite );
 
-				Send(new SelectReq(1, 9));
+					_timerT5ConnectSeparationTimeout.Change( Timeout.Infinite, Timeout.Infinite );
 
-				BeginRecv();
-			}
-			else
-			{
-				_connectionTimer.Change(1000, Timeout.Infinite);
+					Console.WriteLine( "connected !!!" );
+
+					BeginRecv();
+
+					//Send( new SelectReq( 1, 9 ) );
+				}
+				else
+				{
+					_timerT5ConnectSeparationTimeout.Change( _config.T5 * 1000, Timeout.Infinite );
+				}
 			}
 		}
 		#endregion
@@ -165,11 +193,11 @@ namespace Semi.Hsms.Connections
 		/// <param name="m"></param>
 		public void Send(Message m)
 		{
-			if (!_bRun)
-				return;
-
 			lock (_mLock)
 			{
+				if( !_bRun )
+					return;
+
 				Debug.WriteLine($"sending: {m.ToString()}");
 
 				var arr = Coder.Encode(m);
@@ -203,33 +231,34 @@ namespace Semi.Hsms.Connections
 		/// <param name="ar"></param>
 		private void OnRecv(IAsyncResult ar)
 		{
-			var _bClose = false;
+			// think about lock !!!
+			var bClose = false;
 
 			try
 			{
-				var buffer = CompleteRecv(ar);
+				var buffer = CompleteRecv( ar );
 
-				if (buffer != null)
-				{
-					var m = Coder.Decode(buffer);
+				bClose = ( null == buffer );
 
-					AnalyzeRecv(m);
+				if( bClose )
+					return;
 
-					BeginRecv();
-				}
-				else
-				{
-					_bClose = true;
-				}
+				var m = Coder.Decode( buffer );
+
+				AnalyzeRecv( m );
+
+				BeginRecv();
 			}
-			catch (Exception e)
+			catch //(Exception e)
 			{
-				_bClose = true;
+				bClose = true;
 			}
 			finally
 			{
-				if (_bClose)
+				if( bClose ) 
+				{
 					CloseConnection();
+				}
 			}
 		}
 		/// <summary>
@@ -290,34 +319,15 @@ namespace Semi.Hsms.Connections
 		/// <param name="m"></param>
 		private void HandleSelectRsp(SelectRsp m)
 		{
-			_state = State.ConnectedSelected;
+			Console.WriteLine( "Connected Selected" );
 
-			Console.WriteLine("Connected Selected");
-			_selectionTimer.Change(Timeout.Infinite, Timeout.Infinite);
+			_state = State.ConnectedSelected;
+			
+			_timerT7ConnectionIdleTimeout.Change(Timeout.Infinite, Timeout.Infinite);
 
 			Connected?.Invoke(this, EventArgs.Empty);
 		}
-		/// <summary>
-		/// 
-		/// </summary>
-		private void CloseConnection()
-		{
-			Console.WriteLine("Reconnecting");
-
-			lock (_mLock)
-			{
-				if (!_bRun)
-					return;
-
-				_socket.Close();
-
-				_bRun = false;
-
-				_state = State.NotConnected;
-
-				Start();
-			}
-		}
+		
 		#endregion
 
 		#region Class internal structs
