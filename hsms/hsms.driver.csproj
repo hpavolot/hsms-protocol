@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="config\Configurator.cs" />
+    <Compile Include="connections\Connection.cs" />
     <Compile Include="connections\PassiveConnection.cs" />
     <Compile Include="connections\ActiveConnection.cs" />
     <Compile Include="messages\Coder.cs" />
