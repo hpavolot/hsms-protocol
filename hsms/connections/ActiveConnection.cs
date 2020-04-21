@@ -133,22 +133,23 @@ namespace Semi.Hsms.Connections
 		/// </summary>
 		private void TryConnect()
 		{
-			//TODO: add lock !!!
-
-			Console.WriteLine("trying to connect...");
-
-			var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-			var ea = new SocketAsyncEventArgs()
+			lock (_mLock)
 			{
-				RemoteEndPoint = new IPEndPoint(_config.IP, _config.Port)
-			};
+				Console.WriteLine("trying to connect...");
 
-			ea.Completed += OnConnectionCompleted;
+				var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-			s.NoDelay = true;
+				var ea = new SocketAsyncEventArgs()
+				{
+					RemoteEndPoint = new IPEndPoint(_config.IP, _config.Port)
+				};
 
-			s.ConnectAsync(ea);
+				ea.Completed += OnConnectionCompleted;
+
+				s.NoDelay = true;
+
+				s.ConnectAsync(ea);
+			}
 		}
 		/// <summary>
 		/// 
@@ -176,7 +177,7 @@ namespace Semi.Hsms.Connections
 
 					BeginRecv();
 
-					//Send( new SelectReq( 1, 9 ) );
+					Send( new SelectReq( 1, 9 ) );
 				}
 				else
 				{

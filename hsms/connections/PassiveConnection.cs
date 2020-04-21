@@ -63,7 +63,7 @@ namespace Semi.Hsms.Connections
 		{
 			_config = configurator;
 
-			_timerT5ConnectSeparationTimeout = new Timer(s => TryConnect(),
+			_timerT5ConnectSeparationTimeout = new Timer(s => TryListen(),
 				null, Timeout.Infinite, Timeout.Infinite);
 
 			_timerT7ConnectionIdleTimeout = new Timer(s => CloseConnection(),
@@ -84,7 +84,7 @@ namespace Semi.Hsms.Connections
 
 				_bRun = true;
 
-				TryConnect();
+				TryListen();
 			}
 		}
 		/// <summary>
@@ -131,24 +131,25 @@ namespace Semi.Hsms.Connections
 		/// <summary>
 		/// 
 		/// </summary>
-		private void TryConnect()
+		private void TryListen()
 		{
-			//TODO: add lock !!!
-
 			Console.WriteLine("trying to connect...");
 
-			var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-			var ea = new SocketAsyncEventArgs()
+			lock (_mLock)
 			{
-				RemoteEndPoint = new IPEndPoint(_config.IP, _config.Port)
-			};
+				var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-			ea.Completed += OnConnectionCompleted;
+				var ea = new SocketAsyncEventArgs()
+				{
+					RemoteEndPoint = new IPEndPoint(_config.IP, _config.Port)
+				};
 
-			s.NoDelay = true;
+				ea.Completed += OnConnectionCompleted;
 
-			s.ConnectAsync(ea);
+				s.Bind(ea.RemoteEndPoint);
+				s.Listen(10);
+				s.AcceptAsync(ea);
+			}
 		}
 		/// <summary>
 		/// 
@@ -162,9 +163,9 @@ namespace Semi.Hsms.Connections
 				if( !_bRun )
 					return;
 
-				if( null != e.ConnectSocket )
+				if( null != e.AcceptSocket )
 				{
-					_socket = e.ConnectSocket;
+					_socket = e.AcceptSocket;
 
 					_state = State.ConnectedNotSelected;
 
@@ -175,8 +176,6 @@ namespace Semi.Hsms.Connections
 					Console.WriteLine( "connected !!!" );
 
 					BeginRecv();
-
-					//Send( new SelectReq( 1, 9 ) );
 				}
 				else
 				{
@@ -231,33 +230,35 @@ namespace Semi.Hsms.Connections
 		/// <param name="ar"></param>
 		private void OnRecv(IAsyncResult ar)
 		{
-			// think about lock !!!
-			var bClose = false;
-
-			try
+			lock (_mLock)
 			{
-				var buffer = CompleteRecv( ar );
+				var bClose = false;
 
-				bClose = ( null == buffer );
-
-				if( bClose )
-					return;
-
-				var m = Coder.Decode( buffer );
-
-				AnalyzeRecv( m );
-
-				BeginRecv();
-			}
-			catch //(Exception e)
-			{
-				bClose = true;
-			}
-			finally
-			{
-				if( bClose ) 
+				try
 				{
-					CloseConnection();
+					var buffer = CompleteRecv(ar);
+
+					bClose = (null == buffer);
+
+					if (bClose)
+						return;
+
+					var m = Coder.Decode(buffer);
+
+					AnalyzeRecv(m);
+
+					BeginRecv();
+				}
+				catch 
+				{
+					bClose = true;
+				}
+				finally
+				{
+					if (bClose)
+					{
+						CloseConnection();
+					}
 				}
 			}
 		}
@@ -308,10 +309,30 @@ namespace Semi.Hsms.Connections
 
 			switch (m.Type)
 			{
+				case MessageType.SelectReq:
+					HandleSelectReq(m as SelectReq);
+					break;
 				case MessageType.SelectRsp:
 					HandleSelectRsp(m as SelectRsp);
 					break;
 			}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="m"></param>
+		private void HandleSelectReq(SelectReq m)
+		{
+			Console.WriteLine("Received Select Req");
+			var selectRsp = new SelectRsp(m.Device, m.Context, 0);
+			
+			Send( selectRsp);
+
+			_state = State.ConnectedSelected;
+
+			_timerT7ConnectionIdleTimeout.Change(Timeout.Infinite, Timeout.Infinite);
+
+			Connected?.Invoke(this, EventArgs.Empty);
 		}
 		/// <summary>
 		/// 
