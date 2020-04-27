@@ -1,5 +1,6 @@
 ﻿using Semi.Hsms.Messages;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -19,6 +20,10 @@ namespace Semi.Hsms.connections
         /// 
         /// </summary>
         protected Configurator _config;
+        /// <summary>
+        /// 
+        /// </summary>
+        protected Timer _timerT3ReplyTimeout;
         /// <summary>
         /// 
         /// </summary>
@@ -43,6 +48,8 @@ namespace Semi.Hsms.connections
         /// 
         /// </summary>
         protected Object _mLock = new Object();
+
+        protected Dictionary<uint, Timer> _transactions = new Dictionary<uint, Timer>();
         #endregion
 
         #region Class events
@@ -77,6 +84,16 @@ namespace Semi.Hsms.connections
             {
                 _timerT5ConnectSeparationTimeout = new Timer(s => TryListen(),
                     null, Timeout.Infinite, Timeout.Infinite);
+            }
+        }
+
+        private void RemoveTransaction(uint context)
+        {
+            lock (_mLock)
+            {
+                _transactions[context].Change(Timeout.Infinite, Timeout.Infinite);
+                _transactions.Remove(context);
+                Console.WriteLine($"Timeout: T3 Timeout for context {context}");
             }
         }
         #endregion
@@ -209,11 +226,10 @@ namespace Semi.Hsms.connections
                 {
                     RemoteEndPoint = new IPEndPoint(_config.IP, _config.Port)
                 };
-               
+
                 ea.Completed += OnConnectionAccepted;
 
-                if (!s.IsBound)
-                    s.Bind(ea.RemoteEndPoint);
+                s.Bind(ea.RemoteEndPoint);
 
                 s.Listen(10);
                 s.AcceptAsync(ea);
@@ -261,11 +277,19 @@ namespace Semi.Hsms.connections
                 if (!_bRun)
                     return;
 
-                Debug.WriteLine($"sending: {m.ToString()}");
+                Console.WriteLine($"sending: {m.ToString()}");
 
                 var arr = Coder.Encode(m);
 
                 _socket.Send(arr);
+
+                if (m.IsReplyRequired)
+                { 
+                    var timer = new Timer(s => RemoveTransaction(m.Context),
+                    null, _config.T3 *100, Timeout.Infinite);
+
+                    _transactions.Add(m.Context, timer);
+                }
             }
         }
         #endregion
@@ -398,7 +422,10 @@ namespace Semi.Hsms.connections
                     break;
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="m"></param>
         private void HandleDataMessage(DataMessage m)
         {
             if (_state == State.ConnectedSelected)
@@ -417,17 +444,13 @@ namespace Semi.Hsms.connections
         /// <param name="selectReq"></param>
         protected void HandleSelectReq(SelectReq m)
         {
-            lock (_mLock)
+            if (_state == State.ConnectedNotSelected)
             {
-                if (_state == State.ConnectedNotSelected)
-                {
-                    _timerT7ConnectionIdleTimeout.Change(Timeout.Infinite, Timeout.Infinite);
+                _timerT7ConnectionIdleTimeout.Change(Timeout.Infinite, Timeout.Infinite);
 
-                    Send(new SelectRsp(m.Device, m.Context, 0));
+                Send(new SelectRsp(m.Device, m.Context, 0));
 
-                    _state = State.ConnectedSelected;
-
-                }
+                _state = State.ConnectedSelected;
             }
         }
         /// <summary>
@@ -436,22 +459,23 @@ namespace Semi.Hsms.connections
         /// <param name="m"></param>
         protected void HandleSelectRsp(SelectRsp m)
         {
-            lock (_mLock)
+            Console.WriteLine("Received selet rsp");
+            if (_state == State.ConnectedNotSelected)
             {
-                if (_state == State.ConnectedNotSelected)
+                if (m.Status == 0)
                 {
-                    if (m.Status == 0)
-                    {
-                        _timerT6ControlTimeout.Change(Timeout.Infinite, Timeout.Infinite);
+                    _transactions[m.Context].Change(Timeout.Infinite, Timeout.Infinite);
+                    _transactions.Remove(m.Context);
 
-                        _state = State.ConnectedSelected;
+                    _timerT6ControlTimeout.Change(Timeout.Infinite, Timeout.Infinite);
 
-                        Connected?.Invoke(this, EventArgs.Empty);
-                    }
-                    else
-                    {
-                        CloseConnection();
-                    }
+                    _state = State.ConnectedSelected;
+
+                    Connected?.Invoke(this, EventArgs.Empty);
+                }
+                else
+                {
+                    CloseConnection();
                 }
             }
         }
@@ -491,11 +515,8 @@ namespace Semi.Hsms.connections
         /// <param name="separateReq"></param>
         protected void HandleSeparateReq(SeparateReq separateReq)
         {
-            lock (_mLock)
-            {
-                if (_state == State.ConnectedSelected)
-                    CloseConnection();
-            }
+            if (_state == State.ConnectedSelected)
+                CloseConnection();
         }
         #endregion
 

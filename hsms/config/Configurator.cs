@@ -265,6 +265,7 @@ namespace Semi.Hsms.Messages
 			{
 				_ipAddress = c.IP;
 				_port = c.Port;
+				_mode = c.Mode;
 				_t3 = c.T3;
 				_t5 = c.T5;
 				_t6 = c.T6;
@@ -284,6 +285,7 @@ namespace Semi.Hsms.Messages
 				{
 					IP = _ipAddress,
 					Port = _port,
+					Mode = _mode,
 					T3 = _t3,
 					T5 = _t5,
 					T6 = _t6,

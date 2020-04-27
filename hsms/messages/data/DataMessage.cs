@@ -41,7 +41,7 @@ namespace Semi.Hsms.Messages
 		/// <summary>
 		/// 
 		/// </summary>
-		public override bool IsReplyRequired => _isReplyRequired;
+		public override bool IsReplyRequired => IsPrimary;
 		/// <summary>
 		/// 
 		/// </summary>
