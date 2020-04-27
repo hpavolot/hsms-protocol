@@ -1,12 +1,14 @@
 ﻿using Semi.Hsms.Messages;
 using System;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using static Semi.Hsms.Messages.Configurator;
 
 namespace Semi.Hsms.connections
 {
-    public abstract class Connection
+    public class Connection
     {
         #region Class members
         /// <summary>
@@ -65,6 +67,17 @@ namespace Semi.Hsms.connections
 
             _timerT7ConnectionIdleTimeout = new Timer(s => CloseConnection(),
                 null, Timeout.Infinite, Timeout.Infinite);
+
+            if (_config.Mode == ConnectionMode.Active)
+            {
+                _timerT5ConnectSeparationTimeout = new Timer(s => TryConnect(),
+                    null, Timeout.Infinite, Timeout.Infinite);
+            }
+            else
+            {
+                _timerT5ConnectSeparationTimeout = new Timer(s => TryListen(),
+                    null, Timeout.Infinite, Timeout.Infinite);
+            }
         }
         #endregion
 
@@ -72,7 +85,18 @@ namespace Semi.Hsms.connections
         /// <summary>
         /// 
         /// </summary>
-        public abstract void Start();
+        public void Start()
+        {
+            lock (_mLock)
+            {
+                if (_bRun)
+                    return;
+
+                _bRun = true;
+
+                _timerT5ConnectSeparationTimeout.Change(0, Timeout.Infinite);
+            }
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -105,6 +129,122 @@ namespace Semi.Hsms.connections
 
                 _timerT6ControlTimeout.Change(Timeout.Infinite, Timeout.Infinite);
                 _timerT7ConnectionIdleTimeout.Change(Timeout.Infinite, Timeout.Infinite);
+            }
+        }
+        #endregion
+
+        #region Class 'Active Mode' methods
+        /// <summary>
+        /// 
+        /// </summary>
+        private void TryConnect()
+        {
+            lock (_mLock)
+            {
+                Console.WriteLine("trying to connect...");
+
+                var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                var ea = new SocketAsyncEventArgs()
+                {
+                    RemoteEndPoint = new IPEndPoint(_config.IP, _config.Port)
+                };
+
+                ea.Completed += OnConnectionCompleted;
+
+                s.NoDelay = true;
+
+                s.ConnectAsync(ea);
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnConnectionCompleted(object sender, SocketAsyncEventArgs e)
+        {
+            lock (_mLock)
+            {
+                if (!_bRun)
+                    return;
+
+                if (null != e.ConnectSocket)
+                {
+                    _socket = e.ConnectSocket;
+
+                    _state = State.ConnectedNotSelected;
+
+                    Console.WriteLine("connected !!!");
+
+                    BeginRecv();
+
+                    Send(new SelectReq(1, 9));
+
+                    _timerT6ControlTimeout.Change(_config.T6 * 1000, Timeout.Infinite);
+
+                    _timerT5ConnectSeparationTimeout.Change(Timeout.Infinite, Timeout.Infinite);
+                }
+                else
+                {
+                    _timerT5ConnectSeparationTimeout.Change(_config.T5 * 1000, Timeout.Infinite);
+                }
+            }
+        }
+        #endregion
+
+        #region Class 'Passive Mode' methods
+        /// <summary>
+        /// 
+        /// </summary>
+        private void TryListen()
+        {
+            Console.WriteLine("Waiting for a connection...");
+
+            lock (_mLock)
+            {
+                var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                var ea = new SocketAsyncEventArgs()
+                {
+                    RemoteEndPoint = new IPEndPoint(_config.IP, _config.Port)
+                };
+               
+                ea.Completed += OnConnectionAccepted;
+
+                if (!s.IsBound)
+                    s.Bind(ea.RemoteEndPoint);
+
+                s.Listen(10);
+                s.AcceptAsync(ea);
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnConnectionAccepted(object sender, SocketAsyncEventArgs e)
+        {
+            lock (_mLock)
+            {
+                if (!_bRun)
+                    return;
+
+                if (null != e.AcceptSocket)
+                {
+                    _socket = e.AcceptSocket;
+
+                    _state = State.ConnectedNotSelected;
+
+                    _timerT7ConnectionIdleTimeout.Change(_config.T7 * 1000, Timeout.Infinite);
+
+                    _timerT5ConnectSeparationTimeout.Change(Timeout.Infinite, Timeout.Infinite);
+
+                    Console.WriteLine("connected !!!");
+
+                    BeginRecv();
+                }
             }
         }
         #endregion

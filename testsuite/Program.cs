@@ -1,5 +1,5 @@
 ﻿#region Usings
-using Semi.Hsms.Connections;
+using Semi.Hsms.connections;
 using Semi.Hsms.messages.data;
 using Semi.Hsms.Messages;
 using System;
@@ -18,12 +18,13 @@ namespace Semi.Hsms.TestSuite
 		static void Main(string[] args)
 		{
 			var config = new ConfigurationBuilder()
-				.IP( "127.0.0.1" )
-				.T5( 3 )
+				.IP("127.0.0.1")
 				.Port(11000)
+				.Mode(ConnectionMode.Active)
+				.T5(2)
 				.Build();
 
-			var connection = new PassiveConnection( config);
+			var connection = new Connection( config);
 
 			connection.Connected += ( s, ea ) =>
 			{
@@ -46,7 +47,6 @@ namespace Semi.Hsms.TestSuite
 
 			connection.Start();
 
-			//connection.Send( null );
 
 			while( true ) 
 			{

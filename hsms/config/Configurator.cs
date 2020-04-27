@@ -29,6 +29,10 @@ namespace Semi.Hsms.Messages
 		/// <summary>
 		/// 
 		/// </summary>
+		public ConnectionMode Mode { get; private set; }
+		/// <summary>
+		/// 
+		/// </summary>
 		public ushort T3 { get; private set; }
 
 		/// <summary>
@@ -76,7 +80,7 @@ namespace Semi.Hsms.Messages
 		}
 		#endregion
 
-		#region Class internal structs
+		#region Class Configuration Builder
 
 		/// <summary>
 		/// 
@@ -113,37 +117,34 @@ namespace Semi.Hsms.Messages
 			#endregion
 
 			#region Class members
-
 			/// <summary>
 			/// 
 			/// </summary>
 			private IPAddress _ipAddress;
-
 			/// <summary>
 			/// 
 			/// </summary>
 			private int _port;
-
+			/// <summary>
+			/// 
+			/// </summary>
+			private ConnectionMode _mode;
 			/// <summary>
 			/// 
 			/// </summary>
 			private ushort _t3 = DEFAULT_T3;
-
 			/// <summary>
 			/// 
 			/// </summary>
 			private ushort _t5 = DEFAULT_T5;
-
 			/// <summary>
 			/// 
 			/// </summary>
 			private ushort _t6 = DEFAULT_T6;
-
 			/// <summary>
 			/// 
 			/// </summary>
 			private ushort _t7 = DEFAULT_T7;
-
 			/// <summary>
 			/// 
 			/// </summary>
@@ -198,6 +199,16 @@ namespace Semi.Hsms.Messages
 			public ConfigurationBuilder Port( int port )
 			{
 				_port = port;
+				return this;
+			}
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="port"></param>
+			/// <returns></returns>
+			public ConfigurationBuilder Mode(ConnectionMode mode)
+			{
+				_mode = mode;
 				return this;
 			}
 			/// <summary>
@@ -286,6 +297,25 @@ namespace Semi.Hsms.Messages
 			#endregion
 		}
 
+		#endregion
+
+		#region Class internal structs
+		/// <summary>
+		/// 
+		/// </summary>
+		public enum ConnectionMode
+		{
+			#region Class properties
+			/// <summary>
+			/// 
+			/// </summary>
+			Active,
+			/// <summary>
+			/// 
+			/// </summary>
+			Passive,
+			#endregion
+		}
 		#endregion
 	}
 }
