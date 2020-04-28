@@ -1,5 +1,4 @@
 ﻿#region Usings
-using Semi.Hsms.messages.data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -101,6 +100,11 @@ namespace Semi.Hsms.Messages
 
 						case MessageType.SelectRsp:
 							return new SelectRsp(device, context, hb3);
+
+
+
+						case MessageType.SeparateReq:
+							return new SeparateReq( device, context);
 
 							//case MessageType.DeselectReq:
 							//	{

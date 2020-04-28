@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Semi.Hsms.messages.data
+namespace Semi.Hsms.Messages
 {
 	/// <summary>
 	/// 
@@ -18,7 +18,6 @@ namespace Semi.Hsms.messages.data
 		/// </summary>
 		public bool Value { get; }
 		#endregion
-
 
 		#region Class initializations
 		/// <summary>
@@ -88,5 +87,4 @@ namespace Semi.Hsms.messages.data
 		}
 		#endregion
 	}
-
 }

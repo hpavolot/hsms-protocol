@@ -1,6 +1,5 @@
 ﻿#region Usings
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Semi.Hsms.messages.data;
 using Semi.Hsms.Messages;
 using System;
 using System.Linq;
@@ -451,6 +450,5 @@ namespace hsms.tests
 			CollectionAssert.AreEqual(expected, actual);
 		}
 		#endregion
-
 	}
 }
