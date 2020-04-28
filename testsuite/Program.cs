@@ -2,90 +2,78 @@
 using Semi.Hsms.Messages;
 using System;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using static Semi.Hsms.Messages.Configurator;
 #endregion
 
 namespace Semi.Hsms.TestSuite
 {
-	class Program
-	{
-		#region Class public methods
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="args"></param>
-		static void Main( string [] args )
-		{
-			var config = new ConfigurationBuilder()
-					.IP( "127.0.0.1" )
-					.Port( 11000 )
-					.Mode( ConnectionMode.Passive )
-					.T5( 2 )
-					.Build();
+    class Program
+    {
+        private static RNGCryptoServiceProvider _random = new RNGCryptoServiceProvider();
 
-			var a = DateTime.Now;
-			var b = DateTime.Now;
+        #region Class public methods
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="args"></param>
+        static void Main(string[] args)
+        {
+            var config = new ConfigurationBuilder()
+                    .IP("127.0.0.1")
+                    .Port(11000)
+                    .Mode(ConnectionMode.Passive)
+                    .T5(2)
+                    .Build();
 
-			var connection = new Connection( config );
+            var connection = new Connection(config);
 
-			connection.T3Timeout += ( s, ea ) => Debug.WriteLine( "Message was not delivered" );
+            connection.T3Timeout += (s, ea) => Console.WriteLine("Message was not delivered");
 
-			connection.Connected += ( s, ea ) =>
-			{
-				var m = DataMessage
-									.Builder
-									.Device( 1 )
-									.Context( 12 )
-									.Stream( 5 )
-									.Function( 3 )
-									.Items( new ListItem(
-											new Bool( true ),
-											new A( "lena", 5 ),
-											new I2( 5 ) ),
-											new ListItem(
-													new F4( 12.5f ) ) )
-									.Build();
+            connection.Connected += (s, ea) => Console.WriteLine("Connection established");
 
-				connection.Send( m );
+            byte[] uintBuffer = new byte[sizeof(uint)];
 
-				var m2 = DataMessage
-						.Builder
-						.Device( 1 )
-						.Context( 14 )
-						.Stream( 5 )
-						.Function( 5 )
-						.Items( new A( "test", 4 ) )
-						.Build();
+            _random.GetBytes(uintBuffer);
+            uint context = BitConverter.ToUInt32(uintBuffer, 0);
 
-				connection.Send( m2 );
-
-			};
-
-			connection.Start();
-
-		
-			while( true )
-			{
-				var cmd = Console.ReadLine();
-
-				switch( cmd )
-				{
-					case "start":
-						connection.Start();
-						break;
-
-					case "stop":
-						connection.Stop();
-						break;
-
-					case "exit":
-						return;
-				}
-			}
-
-		}
+            var m = DataMessage
+                .Builder
+                .Context(context)
+                .Device(1)
+                .Stream(1)
+                .Function(101)
+                .Build();
 
 
-		#endregion
-	}
+            while (true)
+            {
+                var cmd = Console.ReadLine();
+
+                switch (cmd)
+                {
+                    case "start":
+                        connection.Start();
+                        break;
+
+                    case "send":
+                        connection.Send(m);
+                        break;
+
+                    case "stop":
+                        connection.Stop();
+                        break;
+
+                    case "exit":
+                        return;
+
+
+                }
+            }
+
+        }
+
+
+        #endregion
+    }
 }

@@ -95,13 +95,21 @@ namespace Semi.Hsms.Messages
 
 					switch ((MessageType)stype)
 					{
+						case MessageType.DataMessage:
+							return DataMessage.Builder
+								.Device(device)
+								.Context(context)
+								.Stream(hb2)
+								.Function(hb3)
+								.Build();
+
+					//TODO to decode Items 
+
 						case MessageType.SelectReq:
 							return new SelectReq(device, context);
 
 						case MessageType.SelectRsp:
 							return new SelectRsp(device, context, hb3);
-
-
 
 						case MessageType.SeparateReq:
 							return new SeparateReq( device, context);
@@ -144,7 +152,6 @@ namespace Semi.Hsms.Messages
 		}
 		#endregion
 	}
-
 	/// <summary>
 	/// 
 	/// </summary>
