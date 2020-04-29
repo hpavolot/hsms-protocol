@@ -8,72 +8,67 @@ using static Semi.Hsms.Messages.Configurator;
 
 namespace Semi.Hsms.TestSuite
 {
-    class Program
-    {
-        private static RNGCryptoServiceProvider _random = new RNGCryptoServiceProvider();
+	class Program
+	{
+		#region Class public methods
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="args"></param>
+		static void Main( string [] args )
+		{
+			var config = new ConfigurationBuilder()
+							.IP( "127.0.0.1" )
+							.Port( 11000 )
+							.Mode( ConnectionMode.Passive )
+							.T5( 2 )
+							.Build();
 
-        #region Class public methods
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="args"></param>
-        static void Main(string[] args)
-        {
-            var config = new ConfigurationBuilder()
-                    .IP("127.0.0.1")
-                    .Port(11000)
-                    .Mode(ConnectionMode.Passive)
-                    .T5(2)
-                    .Build();
+			var connection = new Connection( config );
 
-            var connection = new Connection(config);
+			connection.T3Timeout += ( s, ea ) => Console.WriteLine( "Message was not delivered" );
 
-            connection.T3Timeout += (s, ea) => Console.WriteLine("Message was not delivered");
+			connection.Connected += ( s, ea ) => Console.WriteLine( "Connection established" );
 
-            connection.Connected += (s, ea) => Console.WriteLine("Connection established");
+			byte [] uintBuffer = new byte [ sizeof( uint ) ];
 
-            byte[] uintBuffer = new byte[sizeof(uint)];
-
-            _random.GetBytes(uintBuffer);
-            uint context = BitConverter.ToUInt32(uintBuffer, 0);
-
-            var m = DataMessage
-                .Builder
-                .Context(context)
-                .Device(1)
-                .Stream(1)
-                .Function(101)
-                .Build();
+			var m = DataMessage
+					.Builder
+					.NewContext()
+					.Device( 1 )
+					.Stream( 1 )
+					.Function( 101 )
+					.Build();
 
 
-            while (true)
-            {
-                var cmd = Console.ReadLine();
+			while( true )
+			{
+				var cmd = Console.ReadLine();
 
-                switch (cmd)
-                {
-                    case "start":
-                        connection.Start();
-                        break;
+				switch( cmd )
+				{
+					case "start":
+						connection.Start();
+						break;
 
-                    case "send":
-                        connection.Send(m);
-                        break;
+					case "send":
+						connection.Send( m );
+						break;
 
-                    case "stop":
-                        connection.Stop();
-                        break;
+					case "stop":
+						connection.Stop();
+						break;
 
-                    case "exit":
-                        return;
-
-
-                }
-            }
-
-        }
+					case "exit":
+						return;
 
 
-        #endregion
-    }
+				}
+			}
+
+		}
+
+
+		#endregion
+	}
 }

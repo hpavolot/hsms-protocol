@@ -1,103 +1,122 @@
 ﻿#region Usings
 using System;
+using System.Security.Cryptography;
 #endregion
 
 namespace Semi.Hsms.Messages
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public abstract class Message
-    {
-        #region Class members
-        #endregion
+	/// <summary>
+	/// 
+	/// </summary>
+	public abstract class Message
+	{
+		#region Class members
+		/// <summary>
+		/// 
+		/// </summary>
+		private static RNGCryptoServiceProvider _random = new RNGCryptoServiceProvider();
+		#endregion
 
-        #region Class properties
-        /// <summary>
-        /// 
-        /// </summary>
-        public ushort Device { get; protected set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public uint Context { get; protected set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public abstract MessageType Type { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public abstract bool IsReplyRequired { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public abstract bool IsPrimary { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public DateTime Time { get; protected set; }
-        #endregion
+		#region Class properties
+		/// <summary>
+		/// 
+		/// </summary>
+		public ushort Device { get; protected set; }
+		/// <summary>
+		/// 
+		/// </summary>
+		public uint Context { get; protected set; }
+		/// <summary>
+		/// 
+		/// </summary>
+		public abstract MessageType Type { get; }
+		/// <summary>
+		/// 
+		/// </summary>
+		public abstract bool IsReplyRequired { get; }
+		/// <summary>
+		/// 
+		/// </summary>
+		public abstract bool IsPrimary { get; }
+		/// <summary>
+		/// 
+		/// </summary>
+		public DateTime Time { get; protected set; }
+		/// <summary>
+		/// 
+		/// </summary>
+		public static uint NextContext 
+		{
+			get 
+			{
+				var buffer = new byte [ 4 ];
+				_random.GetBytes( buffer );
 
-        #region Class initialization
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="device"></param>
-        /// <param name="context"></param>
-        public Message(ushort device, uint context)
-        {
-            Device = device;
-            Context = context;
+				return BitConverter.ToUInt32( buffer, 0 );
+			}
+		}
+		#endregion
 
-            Time = DateTime.Now;
-        }
-        #endregion
+		#region Class initialization
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="context"></param>
+		public Message( ushort device, uint context )
+		{
+			Device = device;
+			Context = context;
 
-        #region Class public methods
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public override bool Equals(object obj)
-        {
-            if (null == obj)
-                return false;
+			Time = DateTime.Now;
+		}
+		#endregion
 
-            if (object.ReferenceEquals(this, obj))
-                return true;
+		#region Class public methods
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public override bool Equals( object obj )
+		{
+			if( null == obj )
+				return false;
 
-            var m = obj as Message;
+			if( object.ReferenceEquals( this, obj ) )
+				return true;
 
-            if (null == m)
-                return false;
+			var m = obj as Message;
 
-            if (Device != m.Device)
-                return false;
+			if( null == m )
+				return false;
 
-            if (Context != m.Context)
-                return false;
+			if( Device != m.Device )
+				return false;
 
-            if (Type != m.Type)
-                return false;
+			if( Context != m.Context )
+				return false;
 
-            return true;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public override int GetHashCode()
-        {
-            int hash = 17;
+			if( Type != m.Type )
+				return false;
 
-            hash = hash * 23 + Device.GetHashCode();
-            hash = hash * 23 + Context.GetHashCode();
-            hash = hash * 23 + Type.GetHashCode();
+			return true;
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public override int GetHashCode()
+		{
+			int hash = 17;
 
-            return hash;
-        }
-        #endregion
-    }
+			hash = hash * 23 + Device.GetHashCode();
+			hash = hash * 23 + Context.GetHashCode();
+			hash = hash * 23 + Type.GetHashCode();
+
+			return hash;
+		}
+		
+		#endregion
+	}
 }
