@@ -141,6 +141,16 @@ namespace Semi.Hsms.Messages
 			/// <summary>
 			/// 
 			/// </summary>
+			/// <param name="context"></param>
+			/// <returns></returns>
+			public DataMessageBuilder NewContext()
+			{
+				_context = Message.NextContext;
+				return this;
+			}
+			/// <summary>
+			/// 
+			/// </summary>
 			/// <param name="dataItem"></param>
 			/// <returns></returns>
 			public DataMessageBuilder Items( params DataItem [] dataItems )

@@ -21,7 +21,7 @@ namespace Semi.Hsms.Messages
         /// </summary>
         /// <param name="device"></param>
         /// <param name="context"></param>
-        public SelectReq(ushort device, uint context)
+        public SelectReq(ushort device, uint context )
             : base(device, context)
         {
         }
