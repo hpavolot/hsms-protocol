@@ -1,6 +1,7 @@
 ﻿#region Usings
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,428 +9,615 @@ using System.Text;
 
 namespace Semi.Hsms.Messages
 {
-	/// <summary>
-	/// 
-	/// </summary>
-	public class Coder
-	{
-		#region Class constants
-		/// <summary>
-		/// 
-		/// </summary>
-		public const int MESSAGE_PREFIX_LEN = 4;
-		#endregion
+    /// <summary>
+    /// 
+    /// </summary>
+    public class Coder
+    {
+        #region Class constants
+        /// <summary>
+        /// 
+        /// </summary>
+        public const int MESSAGE_PREFIX_LEN = 4;
+        #endregion
 
-		#region Class 'Encode' methods
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="sr"></param>
-		public static byte[] Encode(Message m)
-		{
-			byte[] msgBytes = null;
+        #region Class 'Encode' methods
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sr"></param>
+        public static byte[] Encode(Message m)
+        {
+            byte[] msgBytes = null;
 
-			using (var ms = new MemoryStream())
-			{
-				using (var w = new BinaryWriter(ms))
-				{
-					// SessionId
-					w.WriteDevice(m);
+            using (var ms = new MemoryStream())
+            {
+                using (var w = new BinaryWriter(ms))
+                {
+                    // SessionId
+                    w.WriteDevice(m);
 
-					// Byte 2
-					w.WriteByte2(m);
+                    // Byte 2
+                    w.WriteByte2(m);
 
-					// Byte 3
-					w.WriteByte3(m);
+                    // Byte 3
+                    w.WriteByte3(m);
 
-					// PType
-					w.Write(byte.MinValue);
+                    // PType
+                    w.Write(byte.MinValue);
 
-					// SType
-					w.WriteType(m);
+                    // SType
+                    w.WriteType(m);
 
-					// System bytes
-					w.WriteContext(m);
+                    // System bytes
+                    w.WriteContext(m);
 
-					//Message body
-					w.WriteBody(m);
+                    //Message body
+                    w.WriteBody(m);
 
-				}
+                }
 
-				msgBytes = ms.PrependLengthBytes();
-			}
+                msgBytes = ms.PrependLengthBytes();
+            }
 
-			return msgBytes;
-		}
-		#endregion
+            return msgBytes;
+        }
+        #endregion
 
-		#region Class 'Decode' methods
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="buffer"></param>
-		/// <returns></returns>
-		public static Message Decode(byte[] buffer)
-		{
-			using (var ms = new MemoryStream(buffer))
-			{
-				using (var r = new BinaryReader(ms))
-				{
-					var device = BitConverter.ToUInt16(r
-						.ReadBytes(2)
-						.Reverse()
-						.ToArray(), 0);
+        #region Class 'Decode' methods
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns></returns>
+        public static Message Decode(byte[] buffer)
+        {
+            using (var ms = new MemoryStream(buffer))
+            {
+                using (var r = new BinaryReader(ms))
+                {
+                    var device = BitConverter.ToUInt16(r
+                        .ReadBytes(2)
+                        .Reverse()
+                        .ToArray(), 0);
 
-					var hb2 = r.ReadByte();
+                    var hb2 = r.ReadByte();
 
-					var hb3 = r.ReadByte();
+                    var hb3 = r.ReadByte();
 
-					var ptype = r.ReadByte();
+                    var ptype = r.ReadByte();
 
-					var stype = r.ReadByte();
+                    var stype = r.ReadByte();
 
-					var context = BitConverter.ToUInt32(r
-						.ReadBytes(4)
-						.Reverse()
-						.ToArray(), 0);
+                    var context = BitConverter.ToUInt32(r
+                        .ReadBytes(4)
+                        .Reverse()
+                        .ToArray(), 0);
 
-					switch ((MessageType)stype)
-					{
-						case MessageType.DataMessage:
-							return DataMessage.Builder
-								.Device(device)
-								.Context(context)
-								.Stream(hb2)
-								.Function(hb3)
-								.Build();
+                    switch ((MessageType)stype)
+                    {
+                        case MessageType.DataMessage:
+                            {
+                                var dataItem = r.ReadDataItem();
 
-					//TODO to decode Items 
-
-						case MessageType.SelectReq:
-							return new SelectReq(device, context);
-
-						case MessageType.SelectRsp:
-							return new SelectRsp(device, context, hb3);
-
-						case MessageType.SeparateReq:
-							return new SeparateReq( device, context);
-
-							//case MessageType.DeselectReq:
-							//	{
-							//		return new DeselectReq(device, context);
-							//	}
-							//case MessageType.DeselectRsp:
-							//	{
-							//		var status = reader.ReadByte();
-							//		return new DeselectRsp(device, context, status);
-							//	}
-							//case MessageType.LinktestReq:
-							//	{
-							//		return new LinkTestReq(context);
-							//	}
-							//case MessageType.LinktestRsp:
-							//	{
-							//		return new LinkTestRsp(context);
-							//	}
-							//case MessageType.RejectReq:
-							//	{
-							//		var reason = reader.ReadByte();
-							//		return new RejectReq(device, context, reason);
-							//	}
-							//case MessageType.SeparateReq:
-							//	{
-							//		return new SeparateReq(device, context);
-							//	}
-							//default:
-							//	return null;
+                                return DataMessage.Builder
+                                    .Device(device)
+                                    .Context(context)
+                                    .Stream(hb2)
+                                    .Function(hb3)
+                                    .Items(dataItem)
+                                    .Build();
+                            }
 
 
-					}
-				}
-			}
+                        case MessageType.SelectReq:
+                            return new SelectReq(device, context);
 
-			return null;
-		}
-		#endregion
-	}
-	/// <summary>
-	/// 
-	/// </summary>
-	internal static class CoderExt
-	{
-		#region Class public methods
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="w"></param>
-		public static void WriteDevice(this BinaryWriter w, Message m)
-		{
-			w.Write(BitConverter
-					.GetBytes(m.Device)
-					.Reverse()
-					.ToArray());
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="w"></param>
-		public static void WriteContext(this BinaryWriter w, Message m)
-		{
-			w.Write(BitConverter
-					.GetBytes(m.Context)
-					.Reverse()
-					.ToArray());
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="w"></param>
-		/// <param name="m"></param>
-		public static void WriteByte2(this BinaryWriter w, Message m)
-		{
-			if (m is DataMessage dm)
-			{
-				w.Write(dm.Stream);
-			}
-			else
-			{
-				w.Write(byte.MinValue);
-			}
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="w"></param>
-		public static void WriteByte3(this BinaryWriter w, Message m)
-		{
-			switch (m)
-			{
-				case DataMessage dataMsg:
-					w.Write(dataMsg.Function);
-					break;
+                        case MessageType.SelectRsp:
+                            return new SelectRsp(device, context, hb3);
 
-				case SelectRsp selectRsp:
-					w.Write(selectRsp.Status);
-					break;
+                        case MessageType.SeparateReq:
+                            return new SeparateReq(device, context);
 
-				case DeselectRsp deselectRsp:
-					w.Write(deselectRsp.Status);
-					break;
+                            //case MessageType.DeselectReq:
+                            //	{
+                            //		return new DeselectReq(device, context);
+                            //	}
+                            //case MessageType.DeselectRsp:
+                            //	{
+                            //		var status = reader.ReadByte();
+                            //		return new DeselectRsp(device, context, status);
+                            //	}
+                            //case MessageType.LinktestReq:
+                            //	{
+                            //		return new LinkTestReq(context);
+                            //	}
+                            //case MessageType.LinktestRsp:
+                            //	{
+                            //		return new LinkTestRsp(context);
+                            //	}
+                            //case MessageType.RejectReq:
+                            //	{
+                            //		var reason = reader.ReadByte();
+                            //		return new RejectReq(device, context, reason);
+                            //	}
+                            //case MessageType.SeparateReq:
+                            //	{
+                            //		return new SeparateReq(device, context);
+                            //	}
+                            //default:
+                            //	return null;
 
-				case RejectReq rejectReq:
-					w.Write(rejectReq.Reason);
-					break;
 
-				default:
-					w.Write(byte.MinValue);
-					break;
-			}
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="w"></param>
-		public static void WriteType(this BinaryWriter w, Message m)
-		{
-			w.Write((byte)m.Type);
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="w"></param>
-		public static void WriteBody(this BinaryWriter w, Message m)
-		{
-			var dm = m as DataMessage;
+                    }
+                }
+            }
 
-			if (null == dm)
-				return;
-			else
-			{
-				w.WriteDataItems(dm.Items);
-			}
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="ms"></param>
-		/// <param name="dataItems"></param>
-		public static void WriteDataItems(this BinaryWriter w, IEnumerable<DataItem> dataItems)
-		{
-			foreach (var item in dataItems)
-			{
-				var type = item.Type;
+            return null;
+        }
+        #endregion
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    internal static class CoderExt
+    {
+        #region Class public methods
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        public static void WriteDevice(this BinaryWriter w, Message m)
+        {
+            w.Write(BitConverter
+                    .GetBytes(m.Device)
+                    .Reverse()
+                    .ToArray());
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        public static void WriteContext(this BinaryWriter w, Message m)
+        {
+            w.Write(BitConverter
+                    .GetBytes(m.Context)
+                    .Reverse()
+                    .ToArray());
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        /// <param name="m"></param>
+        public static void WriteByte2(this BinaryWriter w, Message m)
+        {
+            if (m is DataMessage dm)
+            {
+                w.Write(dm.Stream);
+            }
+            else
+            {
+                w.Write(byte.MinValue);
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        public static void WriteByte3(this BinaryWriter w, Message m)
+        {
+            switch (m)
+            {
+                case DataMessage dataMsg:
+                    w.Write(dataMsg.Function);
+                    break;
 
-				if (type.IsNumeric())
-				{
-					w.WriteNumericItem(item);
-				}
-				else if (type.IsString())
-				{
-					w.WriteStringItem(item);
-				}
-				else if (type.IsList())
-				{
-					w.WriteListItem(item);
-				}
-				else if (type.IsBoolean())
-				{
-					w.WriteBooleanItem(item);
-				}
-			}
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="w"></param>
-		/// <param name="item"></param>
-		private static void WriteListItem(this BinaryWriter w, DataItem item)
-		{
-			var sublist = item as ListItem;
-			w.WriteItemHeader(Format.List, sublist.Items.Count());
-			w.WriteDataItems(sublist.Items);
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="w"></param>
-		/// <param name="item"></param>
-		private static void WriteStringItem(this BinaryWriter w, DataItem item)
-		{
-			var si = item as StringItem;
-			w.WriteItemHeader(Format.A, si.Length);
-			w.Write(Encoding.ASCII.GetBytes(si.Value));
-		}
-		private static void WriteBooleanItem(this BinaryWriter w, DataItem item)
-		{
-			var bi = item as BoolItem;
-			w.WriteByte((byte)Format.Bool | 1);
-			w.WriteByte(1);
-			w.Write(bi.Value);
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="w"></param>
-		/// <param name="btNoLenBytes"></param>
-		/// <param name="len"></param>
-		private static void WriteItemHeader(this BinaryWriter w, Format type, int len)
-		{
-			byte btNoLenBytes = (byte)((len <= byte.MaxValue) ? 1 : (len <= ushort.MaxValue) ? 2 : 3);
+                case SelectRsp selectRsp:
+                    w.Write(selectRsp.Status);
+                    break;
 
-			var btFormatByte = (byte)type | btNoLenBytes;
-			w.WriteByte(btFormatByte);
+                case DeselectRsp deselectRsp:
+                    w.Write(deselectRsp.Status);
+                    break;
 
-			switch (btNoLenBytes)
-			{
-				case 1:
-					w.WriteByte(len);
-					break;
+                case RejectReq rejectReq:
+                    w.Write(rejectReq.Reason);
+                    break;
 
-				case 2:
-					w.Write(BitConverter
-						.GetBytes(Convert.ToInt16(len))
-						.Reverse()
-						.ToArray());
-					break;
+                default:
+                    w.Write(byte.MinValue);
+                    break;
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        public static void WriteType(this BinaryWriter w, Message m)
+        {
+            w.Write((byte)m.Type);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        public static void WriteBody(this BinaryWriter w, Message m)
+        {
+            var dm = m as DataMessage;
 
-				case 3:
-					w.Write((byte[])BitConverter
-						.GetBytes(len)
-						.Reverse()
-						.Skip(1)
-						.ToArray());
-					break;
-			}
-		}
-		/// <summary>()
-		/// 
-		/// </summary>
-		/// <param name="w"></param>
-		/// <param name="item"></param>
-		private static void WriteNumericItem(this BinaryWriter w, DataItem item)
-		{
-			w.WriteByte((byte)item.Type | 1);
+            if (null == dm)
+                return;
+            else
+            {
+                w.WriteDataItems(dm.Items);
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ms"></param>
+        /// <param name="dataItems"></param>
+        public static void WriteDataItems(this BinaryWriter w, IEnumerable<DataItem> dataItems)
+        {
+            foreach (var item in dataItems)
+            {
+                var type = item.Type;
 
-			var bytes = GetBytes(item);
+                if (type.IsNumeric())
+                {
+                    w.WriteNumericItem(item);
+                }
+                else if (type.IsString())
+                {
+                    w.WriteStringItem(item);
+                }
+                else if (type.IsList())
+                {
+                    w.WriteListItem(item);
+                }
+                else if (type.IsBoolean())
+                {
+                    w.WriteBooleanItem(item);
+                }
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        /// <param name="item"></param>
+        private static void WriteListItem(this BinaryWriter w, DataItem item)
+        {
+            var sublist = item as ListItem;
+            w.WriteItemHeader(Format.List, sublist.Items.Count());
+            w.WriteDataItems(sublist.Items);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        /// <param name="item"></param>
+        private static void WriteStringItem(this BinaryWriter w, DataItem item)
+        {
+            var si = item as StringItem;
+            w.WriteItemHeader(Format.A, si.Length);
+            w.Write(Encoding.ASCII.GetBytes(si.Value));
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        /// <param name="item"></param>
+        private static void WriteBooleanItem(this BinaryWriter w, DataItem item)
+        {
+            var bi = item as BoolItem;
+            w.WriteByte((byte)Format.Bool | 1);
+            w.WriteByte(1);
+            w.Write(bi.Value);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        /// <param name="btNoLenBytes"></param>
+        /// <param name="len"></param>
+        private static void WriteItemHeader(this BinaryWriter w, Format type, int len)
+        {
+            byte btNoLenBytes = (byte)((len <= byte.MaxValue) ? 1 : (len <= ushort.MaxValue) ? 2 : 3);
 
-			w.WriteByte(bytes.Length);
+            var btFormatByte = (byte)type | btNoLenBytes;
+            w.WriteByte(btFormatByte);
 
-			w.Write(bytes
-				.Reverse()
-				.ToArray());
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="x"></param>
-		/// <returns></returns>
-		private static byte[] GetBytes(DataItem item)
-		{
-			switch (item)
-			{
-				case NumericItem<sbyte> i1:
-					return new byte[] {(byte) i1.Value };
+            switch (btNoLenBytes)
+            {
+                case 1:
+                    w.WriteByte(len);
+                    break;
 
-				case NumericItem<short> i2:
-					return BitConverter.GetBytes(i2.Value);
+                case 2:
+                    w.Write(BitConverter
+                        .GetBytes(Convert.ToInt16(len))
+                        .Reverse()
+                        .ToArray());
+                    break;
 
-				case NumericItem<int> i4:
-					return BitConverter.GetBytes(i4.Value);
+                case 3:
+                    w.Write((byte[])BitConverter
+                        .GetBytes(len)
+                        .Reverse()
+                        .Skip(1)
+                        .ToArray());
+                    break;
+            }
+        }
+        /// <summary>()
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        /// <param name="item"></param>
+        private static void WriteNumericItem(this BinaryWriter w, DataItem item)
+        {
+            w.WriteByte((byte)item.Type | 1);
 
-				case NumericItem<long> i8:
-					return BitConverter.GetBytes(i8.Value);
+            var bytes = GetBytes(item);
 
-				case NumericItem<float> f4:
-					return BitConverter.GetBytes(f4.Value);
+            w.WriteByte(bytes.Length);
 
-				case NumericItem<double> f8:
-					return BitConverter.GetBytes(f8.Value);
+            w.Write(bytes
+                .Reverse()
+                .ToArray());
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        private static byte[] GetBytes(DataItem item)
+        {
+            switch (item)
+            {
+                case NumericItem<sbyte> i1:
+                    return new byte[] { (byte)i1.Value };
 
-				case NumericItem<byte> u1:
-					return new byte[] { u1.Value };
+                case NumericItem<short> i2:
+                    return BitConverter.GetBytes(i2.Value);
 
-				case NumericItem<ushort> u2:
-					return BitConverter.GetBytes(u2.Value);
+                case NumericItem<int> i4:
+                    return BitConverter.GetBytes(i4.Value);
 
-				case NumericItem<uint> u4:
-					return BitConverter.GetBytes(u4.Value);
+                case NumericItem<long> i8:
+                    return BitConverter.GetBytes(i8.Value);
 
-				case NumericItem<ulong> u8:
-					return BitConverter.GetBytes(u8.Value);
-			}
-			return null;
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="w"></param>
-		/// <param name="v"></param>
-		private static void WriteByte(this BinaryWriter w, int v)
-		{
-			w.Write((byte)v);
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="ms"></param>
-		/// <returns></returns>
-		public static byte[] PrependLengthBytes(this MemoryStream ms)
-		{
-			var arr = ms.ToArray();
+                case NumericItem<float> f4:
+                    return BitConverter.GetBytes(f4.Value);
 
-			var arrFinal = new byte[arr.Length + 4];
+                case NumericItem<double> f8:
+                    return BitConverter.GetBytes(f8.Value);
 
-			var bytesForLength = BitConverter
-					.GetBytes(arr.Length)
-					.Reverse()
-					.ToArray();
+                case NumericItem<byte> u1:
+                    return new byte[] { u1.Value };
 
-			bytesForLength.CopyTo(arrFinal, 0);
-			arr.CopyTo(arrFinal, 4);
+                case NumericItem<ushort> u2:
+                    return BitConverter.GetBytes(u2.Value);
 
-			return arrFinal;
-		}
-		#endregion
-	}
+                case NumericItem<uint> u4:
+                    return BitConverter.GetBytes(u4.Value);
+
+                case NumericItem<ulong> u8:
+                    return BitConverter.GetBytes(u8.Value);
+            }
+            return null;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="w"></param>
+        /// <param name="v"></param>
+        private static void WriteByte(this BinaryWriter w, int v)
+        {
+            w.Write((byte)v);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ms"></param>
+        /// <returns></returns>
+        public static byte[] PrependLengthBytes(this MemoryStream ms)
+        {
+            var arr = ms.ToArray();
+
+            var arrFinal = new byte[arr.Length + 4];
+
+            var bytesForLength = BitConverter
+                    .GetBytes(arr.Length)
+                    .Reverse()
+                    .ToArray();
+
+            bytesForLength.CopyTo(arrFinal, 0);
+            arr.CopyTo(arrFinal, 4);
+
+            return arrFinal;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        public static DataItem ReadDataItem(this BinaryReader r)
+        {
+            int format = (r.ReadByte());
+            Format type = (Format)(format & (format - 1));
+
+            if (type.IsNumeric())
+            {
+                return r.ReadNumericItem(type);
+            }
+            else if (type.IsString())
+            {
+                return r.ReadStringItem();
+            }
+            else if (type.IsList())
+            {
+                return r.ReadListItem();
+            }
+            else if (type.IsBoolean())
+            {
+                return r.ReadBooleanItem();
+            }
+            else
+            {
+                throw new SystemException("unsupported data type");
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="r"></param>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public static DataItem ReadNumericItem(this BinaryReader r, Format format)
+        {
+            var len = r.ReadByte();
+
+            switch (format)
+            {
+                case Format.I1:
+                    {
+                        var v = (sbyte)r.ReadByte();
+                        return new I1(v);
+                    }
+                case Format.I2:
+                    {
+                        var v = BitConverter.ToInt16(r
+                        .ReadBytes(len)
+                        .Reverse()
+                        .ToArray(), 0);
+
+                        return new I2(v);
+                    }
+                case Format.I4:
+                    {
+                        var v = BitConverter.ToInt32(r
+                        .ReadBytes(len)
+                        .Reverse()
+                        .ToArray(), 0);
+
+                        return new I4(v);
+                    }
+                case Format.I8:
+                    {
+                        var v = BitConverter.ToInt64(r
+                        .ReadBytes(len)
+                        .Reverse()
+                        .ToArray(), 0);
+
+                        return new I8(v);
+                    }
+                case Format.F4:
+                    {
+                        var v = BitConverter.ToSingle(r
+                        .ReadBytes(len)
+                        .Reverse()
+                        .ToArray(), 0);
+
+                        return new F4(v);
+                    }
+                case Format.F8:
+                    {
+                        var v = BitConverter.ToDouble(r
+                        .ReadBytes(len)
+                        .Reverse()
+                        .ToArray(), 0);
+
+                        return new F8(v);
+                    }
+                case Format.U1:
+                    {
+                        var v = r.ReadByte();
+                        return new U1(v);
+                    }
+                case Format.U2:
+                    {
+                        var v = BitConverter.ToUInt16(r
+                        .ReadBytes(len)
+                        .Reverse()
+                        .ToArray(), 0);
+
+                        return new U2(v);
+                    }
+                case Format.U4:
+                    {
+                        var v = BitConverter.ToUInt32(r
+                        .ReadBytes(len)
+                        .Reverse()
+                        .ToArray(), 0);
+
+                        return new U4(v);
+                    }
+                case Format.U8:
+                    {
+                        var v = BitConverter.ToUInt64(r
+                        .ReadBytes(len)
+                        .Reverse()
+                        .ToArray(), 0);
+
+                        return new U8(v);
+                    }
+
+
+                default:
+                    return null;
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="r"></param>
+        /// <returns></returns>
+        public static DataItem ReadStringItem(this BinaryReader r)
+        {
+            var len = r.ReadByte();
+
+            var bytes = r.ReadBytes(len);
+            var v = Encoding.ASCII.GetString(bytes);
+
+            return new A(v, len);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="r"></param>
+        /// <returns></returns>
+        public static DataItem ReadListItem(this BinaryReader r)
+        {
+            var count = r.ReadByte();
+
+            var items = new DataItem[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                items[i] = r.ReadDataItem();
+            }
+
+            return new ListItem(items);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="r"></param>
+        /// <returns></returns>
+        public static DataItem ReadBooleanItem(this BinaryReader r)
+        {
+            var len = r.ReadByte();
+
+
+            var v = BitConverter.ToBoolean(r
+                        .ReadBytes(len)
+                        .ToArray(), 0);
+
+            return new BoolItem(v);
+        }
+
+        #endregion
+    }
 }
