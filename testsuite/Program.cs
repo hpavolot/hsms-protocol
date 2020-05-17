@@ -1,6 +1,7 @@
 ﻿#region Usings
 using Semi.Hsms.Messages;
 using System;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using static Semi.Hsms.Messages.Configurator;
 #endregion
@@ -22,7 +23,7 @@ namespace Semi.Hsms.TestSuite
                     .IP("127.0.0.1")
                     .Port(11000)
                     .Mode(ConnectionMode.Passive)
-                    .T3(5)
+                    .T5(2)
                     .Build();
 
             var connection = new Connection(config);
@@ -42,7 +43,6 @@ namespace Semi.Hsms.TestSuite
                 .Device(1)
                 .Stream(1)
                 .Function(101)
-                .Items(new I1(14))
                 .Build();
 
 
