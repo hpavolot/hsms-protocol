@@ -109,7 +109,6 @@ namespace Semi.Hsms.Messages
                                     .Build();
                             }
 
-
                         case MessageType.SelectReq:
                             return new SelectReq(device, context);
 
@@ -119,34 +118,30 @@ namespace Semi.Hsms.Messages
                         case MessageType.SeparateReq:
                             return new SeparateReq(device, context);
 
-                            //case MessageType.DeselectReq:
-                            //	{
-                            //		return new DeselectReq(device, context);
-                            //	}
-                            //case MessageType.DeselectRsp:
-                            //	{
-                            //		var status = reader.ReadByte();
-                            //		return new DeselectRsp(device, context, status);
-                            //	}
-                            //case MessageType.LinktestReq:
-                            //	{
-                            //		return new LinkTestReq(context);
-                            //	}
-                            //case MessageType.LinktestRsp:
-                            //	{
-                            //		return new LinkTestRsp(context);
-                            //	}
-                            //case MessageType.RejectReq:
-                            //	{
-                            //		var reason = reader.ReadByte();
-                            //		return new RejectReq(device, context, reason);
-                            //	}
-                            //case MessageType.SeparateReq:
-                            //	{
-                            //		return new SeparateReq(device, context);
-                            //	}
-                            //default:
-                            //	return null;
+                        case MessageType.DeselectReq:
+                            {
+                                return new DeselectReq(device, context);
+                            }
+                        case MessageType.DeselectRsp:
+                            {
+                                var status = r.ReadByte();
+                                return new DeselectRsp(device, context, status);
+                            }
+                        case MessageType.LinktestReq:
+                            {
+                                return new LinkTestReq(context);
+                            }
+                        case MessageType.LinktestRsp:
+                            {
+                                return new LinkTestRsp(context);
+                            }
+                        case MessageType.RejectReq:
+                            {
+                                var reason = r.ReadByte();
+                                return new RejectReq(device, context, reason);
+                            }
+                        default:
+                            return null;
 
 
                     }
@@ -431,9 +426,9 @@ namespace Semi.Hsms.Messages
             var arrFinal = new byte[arr.Length + 4];
 
             var bytesForLength = BitConverter
-                    .GetBytes(arr.Length)
-                    .Reverse()
-                    .ToArray();
+                                    .GetBytes(arr.Length)
+                                    .Reverse()
+                                    .ToArray();
 
             bytesForLength.CopyTo(arrFinal, 0);
             arr.CopyTo(arrFinal, 4);
@@ -464,10 +459,7 @@ namespace Semi.Hsms.Messages
             {
                 return r.ReadBooleanItem();
             }
-            else
-            {
-                throw new SystemException("unsupported data type");
-            }
+            else return null;
         }
         /// <summary>
         /// 
@@ -482,88 +474,66 @@ namespace Semi.Hsms.Messages
             switch (format)
             {
                 case Format.I1:
-                    {
-                        var v = (sbyte)r.ReadByte();
-                        return new I1(v);
-                    }
-                case Format.I2:
-                    {
-                        var v = BitConverter.ToInt16(r
-                        .ReadBytes(len)
-                        .Reverse()
-                        .ToArray(), 0);
+                    return new I1((sbyte)r.ReadByte());
 
-                        return new I2(v);
-                    }
-                case Format.I4:
-                    {
-                        var v = BitConverter.ToInt32(r
-                        .ReadBytes(len)
-                        .Reverse()
-                        .ToArray(), 0);
-
-                        return new I4(v);
-                    }
-                case Format.I8:
-                    {
-                        var v = BitConverter.ToInt64(r
-                        .ReadBytes(len)
-                        .Reverse()
-                        .ToArray(), 0);
-
-                        return new I8(v);
-                    }
-                case Format.F4:
-                    {
-                        var v = BitConverter.ToSingle(r
-                        .ReadBytes(len)
-                        .Reverse()
-                        .ToArray(), 0);
-
-                        return new F4(v);
-                    }
-                case Format.F8:
-                    {
-                        var v = BitConverter.ToDouble(r
-                        .ReadBytes(len)
-                        .Reverse()
-                        .ToArray(), 0);
-
-                        return new F8(v);
-                    }
                 case Format.U1:
-                    {
-                        var v = r.ReadByte();
-                        return new U1(v);
-                    }
+                    return new U1(r.ReadByte());
+
+                case Format.I2:
+                    return new I2(BitConverter
+                                .ToInt16(r
+                                .ReadBytes(len)
+                                .Reverse()
+                                .ToArray(), 0));
+
                 case Format.U2:
-                    {
-                        var v = BitConverter.ToUInt16(r
-                        .ReadBytes(len)
-                        .Reverse()
-                        .ToArray(), 0);
+                    return new U2(BitConverter
+                                .ToUInt16(r
+                                .ReadBytes(len)
+                                .Reverse()
+                                .ToArray(), 0));
 
-                        return new U2(v);
-                    }
+                case Format.I4:
+                    return new I4(BitConverter
+                                .ToInt32(r
+                                .ReadBytes(len)
+                                .Reverse()
+                                .ToArray(), 0));
+
                 case Format.U4:
-                    {
-                        var v = BitConverter.ToUInt32(r
-                        .ReadBytes(len)
-                        .Reverse()
-                        .ToArray(), 0);
+                    return new U4(BitConverter
+                                .ToUInt32(r
+                                .ReadBytes(len)
+                                .Reverse()
+                                .ToArray(), 0));
 
-                        return new U4(v);
-                    }
+                case Format.I8:
+                    return new I8(BitConverter
+                                .ToInt64(r
+                                .ReadBytes(len)
+                                .Reverse()
+                                .ToArray(), 0));
+
                 case Format.U8:
-                    {
-                        var v = BitConverter.ToUInt64(r
-                        .ReadBytes(len)
-                        .Reverse()
-                        .ToArray(), 0);
+                    return new U8(BitConverter
+                                .ToUInt64(r
+                                .ReadBytes(len)
+                                .Reverse()
+                                .ToArray(), 0));
 
-                        return new U8(v);
-                    }
+                case Format.F4:
+                    return new F4(BitConverter
+                                 .ToSingle(r
+                                 .ReadBytes(len)
+                                 .Reverse()
+                                 .ToArray(), 0));
 
+                case Format.F8:
+                    return new F8(BitConverter
+                                .ToDouble(r
+                                .ReadBytes(len)
+                                .Reverse()
+                                .ToArray(), 0));
 
                 default:
                     return null;
@@ -610,10 +580,9 @@ namespace Semi.Hsms.Messages
         {
             var len = r.ReadByte();
 
-
             var v = BitConverter.ToBoolean(r
-                        .ReadBytes(len)
-                        .ToArray(), 0);
+                    .ReadBytes(len)
+                    .ToArray(), 0);
 
             return new BoolItem(v);
         }

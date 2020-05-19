@@ -20,7 +20,7 @@ namespace Semi.Hsms.TestSuite
 			var config = new ConfigurationBuilder()
 							.IP( "127.0.0.1" )
 							.Port( 11000 )
-							.Mode( ConnectionMode.Passive )
+							.Mode( ConnectionMode.Active )
 							.T5( 2 )
 							.Build();
 
@@ -32,6 +32,7 @@ namespace Semi.Hsms.TestSuite
 
 			byte [] uintBuffer = new byte [ sizeof( uint ) ];
 
+			var deselectReq = new DeselectReq(1, 9);
 			var m = DataMessage
 					.Builder
 					.NewContext()
@@ -52,7 +53,7 @@ namespace Semi.Hsms.TestSuite
 						break;
 
 					case "send":
-						connection.Send( m );
+						connection.Send(deselectReq);
 						break;
 
 					case "stop":
