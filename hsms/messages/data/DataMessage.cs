@@ -191,5 +191,16 @@ namespace Semi.Hsms.Messages
 			#endregion
 		}
 		#endregion
+
+		#region Class public methods
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public override string ToString()
+		{
+			return $"data message";
+		}
+		#endregion
 	}
 }

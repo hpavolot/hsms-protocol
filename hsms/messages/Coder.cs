@@ -142,13 +142,9 @@ namespace Semi.Hsms.Messages
                             }
                         default:
                             return null;
-
-
                     }
                 }
             }
-
-            return null;
         }
         #endregion
     }

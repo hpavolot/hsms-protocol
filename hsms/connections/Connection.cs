@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using static Semi.Hsms.Connection.EventDispatcher;
 using static Semi.Hsms.Messages.Configurator;
 #endregion
 
@@ -51,7 +52,7 @@ namespace Semi.Hsms
         /// <summary>
         /// 
         /// </summary>
-        protected Object _mLock = new Object();
+        protected static Object _mLock = new Object();
         /// <summary>
         /// 
         /// </summary>
@@ -60,17 +61,10 @@ namespace Semi.Hsms
         /// 
         /// </summary>
         protected Queue<Message> _queueToSend = new Queue<Message>();
-        #endregion
-
-        #region Class events
         /// <summary>
         /// 
         /// </summary>
-        public event EventHandler Connected;
-        /// <summary>
-        /// 
-        /// </summary>
-        public event EventHandler<Message> T3Timeout;
+        public EventDispatcher _eventDispatcher = new EventDispatcher();
         #endregion
 
         #region Class initialization
@@ -135,19 +129,13 @@ namespace Semi.Hsms
                     {
                         _transactions.Remove(key.Message.Context);
 
-                        T3Timeout?.Invoke(this, key.Message);
-
-
+                        _eventDispatcher.Add(EventType.T3Timeout, key.Message);
                     }
                 }
                 finally
                 {
                     _timerT36.Change(1000, Timeout.Infinite);
                 }
-
-
-
-
             }
         }
         #endregion
@@ -195,7 +183,9 @@ namespace Semi.Hsms
 
                 _state = State.NotConnected;
 
-                Console.WriteLine("disconnected");
+                _queueToSend.Clear();
+
+                _eventDispatcher.Add(EventType.Disconnected);
 
                 var t5FireTime = (_bRun) ? _config.T5 * 1000 : Timeout.Infinite;
                 _timerT5ConnectSeparationTimeout.Change(t5FireTime, Timeout.Infinite);
@@ -248,13 +238,11 @@ namespace Semi.Hsms
 
                     _state = State.ConnectedNotSelected;
 
-                    Console.WriteLine("connected to server");
-
                     BeginRecv();
 
                     SendSelectReq();
 
-                    new Thread(PreprocessMessage).Start();
+                    new Thread(MessageProcessor).Start();
 
                     _timerT5ConnectSeparationTimeout.Change(Timeout.Infinite, Timeout.Infinite);
                 }
@@ -324,9 +312,7 @@ namespace Semi.Hsms
 
                 _timerT5ConnectSeparationTimeout.Change(Timeout.Infinite, Timeout.Infinite);
 
-                Console.WriteLine("client connected");
-
-                new Thread(PreprocessMessage).Start();
+                new Thread(MessageProcessor).Start();
 
                 BeginRecv();
             }
@@ -352,30 +338,47 @@ namespace Semi.Hsms
         /// <summary>
         /// 
         /// </summary>
-        public void PreprocessMessage()
+        protected void MessageProcessor()
         {
             while (true)
             {
                 lock (_mLock)
                 {
-                    while (_queueToSend.Count != 0)
+                    if (_queueToSend.Count != 0)
                     {
                         var m = _queueToSend.Dequeue();
 
-                        Console.WriteLine($"sending: {m.ToString()}");
-                        var arr = Coder.Encode(m);
-
-                        _socket.Send(arr);
-
-                        if (m.IsReplyRequired)
-                        {
-                            _transactions.Add(m.Context, new Transaction(m));
-                        }
+                        CompleteSend(m);
                     }
+                    else
+                    {
+                        Monitor.Wait(_mLock);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="m"></param>
+        protected void CompleteSend(Message m)
+        {
+            try
+            {
+                var arr = Coder.Encode(m);
 
-                    Monitor.Wait(_mLock);
+                if (m.IsReplyRequired)
+                {
+                    _transactions.Add(m.Context, new Transaction(m));
                 }
 
+                _socket.Send(arr);
+
+                _eventDispatcher.Add(EventType.Sent, m);
+            }
+            catch
+            {
+                CloseConnection();
             }
         }
 
@@ -422,6 +425,8 @@ namespace Semi.Hsms
                         return;
 
                     var m = Coder.Decode(buffer);
+
+                    _eventDispatcher.Add(EventType.Received, m);
 
                     AnalyzeRecv(m);
 
@@ -521,7 +526,6 @@ namespace Semi.Hsms
         /// <param name="m"></param>
         protected void HandleDataMessage(DataMessage m)
         {
-            Console.WriteLine($"Received data message:{m.Context}");
             if (_state == State.ConnectedSelected)
             {
                 if (_transactions.ContainsKey(m.Context))
@@ -537,7 +541,7 @@ namespace Semi.Hsms
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="selectReq"></param>
+        /// <param name="m"></param>
         protected void HandleSelectReq(SelectReq m)
         {
             if (_state == State.ConnectedNotSelected)
@@ -548,7 +552,8 @@ namespace Semi.Hsms
 
                 _state = State.ConnectedSelected;
 
-                Connected?.Invoke(this, EventArgs.Empty);
+                _eventDispatcher.Add(EventType.Connected);
+
             }
         }
         /// <summary>
@@ -557,7 +562,6 @@ namespace Semi.Hsms
         /// <param name="m"></param>
         protected void HandleSelectRsp(SelectRsp m)
         {
-            Console.WriteLine("Received select rsp");
             if (_state == State.ConnectedNotSelected)
             {
                 if (_transactions.ContainsKey(m.Context))
@@ -570,7 +574,7 @@ namespace Semi.Hsms
 
                         _state = State.ConnectedSelected;
 
-                        Connected?.Invoke(this, EventArgs.Empty);
+                        _eventDispatcher.Add(EventType.Connected);
                     }
                     else
                     {
@@ -610,11 +614,11 @@ namespace Semi.Hsms
         }
         #endregion
 
-        #region Class internal structs
+        #region Class internal classes
         /// <summary>
         /// 
         /// </summary>
-        public class Transaction
+        protected class Transaction
         {
             #region Class Properties
             /// <summary>
@@ -659,6 +663,135 @@ namespace Semi.Hsms
             ConnectedSelected,
             #endregion
         }
-        #endregion
+        /// <summary>
+        /// 
+        /// </summary>
+        public class EventDispatcher
+        {
+            #region Class events
+            /// <summary>
+            /// 
+            /// </summary>
+            public event EventHandler Connected;
+            /// <summary>
+            /// 
+            /// </summary>
+            public event EventHandler Disconnected;
+            /// <summary>
+            /// 
+            /// </summary>
+            public event EventHandler<Message> Sent;
+            /// <summary>
+            /// 
+            /// </summary>
+            public event EventHandler<Message> Received;
+            /// <summary>
+            /// 
+            /// </summary>
+            public event EventHandler<Message> T3Timeout;
+            #endregion
+
+            #region Class members
+            /// <summary>
+            /// 
+            /// </summary>
+            public Queue<Tuple<EventType, Message>> _eventQueue;
+            public Object dispatcherLock = new Object();
+            #endregion
+
+            #region Class initialization
+            public EventDispatcher()
+            {
+                _eventQueue = new Queue<Tuple<EventType, Message>>();
+
+                new Thread(EventProcessor).Start();
+            }
+            #endregion
+
+            #region Class enums
+            /// <summary>
+            /// 
+            /// </summary>
+            public enum EventType
+            {
+                /// <summary>
+                /// 
+                /// </summary>
+                Connected,
+                /// <summary>
+                /// 
+                /// </summary>
+                Disconnected,
+                /// <summary>
+                /// 
+                /// </summary>
+                Sent,
+                /// <summary>
+                /// 
+                /// </summary>
+                Received,
+                /// <summary>
+                /// 
+                /// </summary>
+                T3Timeout
+            }
+            #endregion
+
+            #region Class methods
+            public void Add(EventType type, Message m = null)
+            {
+                lock (dispatcherLock)
+                {
+                    _eventQueue.Enqueue(new Tuple<EventType, Message>(type, m));
+
+                    Monitor.Pulse(dispatcherLock);
+                }
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            public void EventProcessor()
+            {
+                while (true)
+                {
+                    lock (dispatcherLock)
+                    {
+                        if (_eventQueue.Count != 0)
+                        {
+                            var eventParams = _eventQueue.Dequeue();
+                            var eventType = eventParams.Item1;
+                            var m = eventParams.Item2;
+
+                            switch (eventType)
+                            {
+                                case EventType.Connected:
+                                    Connected?.Invoke(this, EventArgs.Empty);
+                                    break;
+                                case EventType.Disconnected:
+                                    Disconnected?.Invoke(this, EventArgs.Empty);
+                                    break;
+                                case EventType.Sent:
+                                    Sent?.Invoke(this, m);
+                                    break;
+                                case EventType.Received:
+                                    Received?.Invoke(this, m);
+                                    break;
+                                case EventType.T3Timeout:
+                                    T3Timeout?.Invoke(this, m);
+                                    break;
+
+                                default: break;
+                            }
+                        }
+                        else
+                        {
+                            Monitor.Wait(dispatcherLock);
+                        }
+                    }
+                }
+            }
+            #endregion
+        }
     }
+    #endregion
 }

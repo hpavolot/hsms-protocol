@@ -26,13 +26,17 @@ namespace Semi.Hsms.TestSuite
 
 			var connection = new Connection( config );
 
-			connection.T3Timeout += ( s, ea ) => Console.WriteLine( "Message was not delivered" );
+			//connection.T3Timeout += ( s, ea ) => Console.WriteLine( "Message was not delivered" );
 
-			connection.Connected += ( s, ea ) => Console.WriteLine( "Connection established" );
+			connection._eventDispatcher.Connected += ( s, ea ) => Console.WriteLine( "Connection established" );
+			connection._eventDispatcher.Disconnected += (s, ea) => Console.WriteLine("Connection closed");
+			connection._eventDispatcher.Sent += (s, ea) => Console.WriteLine($"Message sent: {ea.ToString()} {ea.Context.ToString()}");
+			connection._eventDispatcher.Received += (s, ea) => Console.WriteLine($"Message received: {ea.ToString()} {ea.Context.ToString()}");
+			connection._eventDispatcher.T3Timeout += (s, ea) => Console.WriteLine($"Message has not been delivered: {ea.ToString()} {ea.Context.ToString()}");
 
-			byte [] uintBuffer = new byte [ sizeof( uint ) ];
 
-			var deselectReq = new DeselectReq(1, 9);
+			byte[] uintBuffer = new byte [ sizeof( uint ) ];
+
 			var m = DataMessage
 					.Builder
 					.NewContext()
@@ -53,7 +57,7 @@ namespace Semi.Hsms.TestSuite
 						break;
 
 					case "send":
-						connection.Send(deselectReq);
+						connection.Send(m);
 						break;
 
 					case "stop":
