@@ -3,7 +3,6 @@ using Semi.Hsms.Messages;
 using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
-using static Semi.Hsms.Messages.Configurator;
 #endregion
 
 namespace Semi.Hsms.TestSuite
@@ -17,22 +16,25 @@ namespace Semi.Hsms.TestSuite
 		/// <param name="args"></param>
 		static void Main( string [] args )
 		{
-			var config = new ConfigurationBuilder()
-							.IP( "127.0.0.1" )
-							.Port( 11000 )
-							.Mode( ConnectionMode.Active )
-							.T5( 2 )
-							.Build();
+			var config = Configurator
+				.Builder
+				.IP( "127.0.0.1" )
+				.Port( 11000 )
+				.Mode( ConnectionMode.Active )
+				.T5( 2 )
+				.Build();
 
 			var connection = new Connection( config );
 
+			
+
 			//connection.T3Timeout += ( s, ea ) => Console.WriteLine( "Message was not delivered" );
 
-			connection._eventDispatcher.Connected += ( s, ea ) => Console.WriteLine( "Connection established" );
-			connection._eventDispatcher.Disconnected += (s, ea) => Console.WriteLine("Connection closed");
-			connection._eventDispatcher.Sent += (s, ea) => Console.WriteLine($"Message sent: {ea.ToString()} {ea.Context.ToString()}");
-			connection._eventDispatcher.Received += (s, ea) => Console.WriteLine($"Message received: {ea.ToString()} {ea.Context.ToString()}");
-			connection._eventDispatcher.T3Timeout += (s, ea) => Console.WriteLine($"Message has not been delivered: {ea.ToString()} {ea.Context.ToString()}");
+			connection.Events.Connected += ( s, ea ) => Console.WriteLine( "Connection established" );
+			connection.Events.Disconnected += (s, ea) => Console.WriteLine("Connection closed");
+			connection.Events.Sent += (s, ea) => Console.WriteLine($"Message sent: {ea.ToString()} {ea.Context.ToString()}");
+			connection.Events.Received += (s, ea) => Console.WriteLine($"Message received: {ea.ToString()} {ea.Context.ToString()}");
+			connection.Events.T3Timeout += (s, ea) => Console.WriteLine($"Message has not been delivered: {ea.ToString()} {ea.Context.ToString()}");
 
 
 			byte[] uintBuffer = new byte [ sizeof( uint ) ];

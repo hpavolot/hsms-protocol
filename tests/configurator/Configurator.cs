@@ -1,7 +1,7 @@
 ﻿#region Usings
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net;
-using static Semi.Hsms.Messages.Configurator;
+using static Semi.Hsms.Configurator;
 #endregion
 
 namespace hsms.tests.configurator

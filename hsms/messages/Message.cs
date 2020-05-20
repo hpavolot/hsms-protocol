@@ -14,7 +14,7 @@ namespace Semi.Hsms.Messages
 		/// <summary>
 		/// 
 		/// </summary>
-		private static RNGCryptoServiceProvider _random = new RNGCryptoServiceProvider();
+		private static readonly RNGCryptoServiceProvider _random = new RNGCryptoServiceProvider();
 		#endregion
 
 		#region Class properties

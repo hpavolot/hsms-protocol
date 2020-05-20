@@ -10,7 +10,7 @@ using System.Xml;
 
 #endregion
 
-namespace Semi.Hsms.Messages
+namespace Semi.Hsms
 {
 	/// <summary>
 	/// 
@@ -300,24 +300,22 @@ namespace Semi.Hsms.Messages
 		}
 
 		#endregion
+	}
 
-		#region Class internal structs
+	/// <summary>
+	/// 
+	/// </summary>
+	public enum ConnectionMode
+	{
+		#region Class properties
 		/// <summary>
 		/// 
 		/// </summary>
-		public enum ConnectionMode
-		{
-			#region Class properties
-			/// <summary>
-			/// 
-			/// </summary>
-			Active,
-			/// <summary>
-			/// 
-			/// </summary>
-			Passive,
-			#endregion
-		}
+		Active,
+		/// <summary>
+		/// 
+		/// </summary>
+		Passive,
 		#endregion
 	}
 }

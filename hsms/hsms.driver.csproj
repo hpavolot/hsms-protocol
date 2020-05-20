@@ -48,6 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="config\Configurator.cs" />
+    <Compile Include="events\EventType.cs" />
+    <Compile Include="events\EventDispatcher.cs" />
     <Compile Include="connections\Connection.cs" />
     <Compile Include="connections\PassiveConnection.cs" />
     <Compile Include="connections\ActiveConnection.cs" />
@@ -60,7 +62,6 @@
     <Compile Include="messages\control\RejectReq.cs" />
     <Compile Include="messages\control\SelectRsp.cs" />
     <Compile Include="messages\control\SelectReq.cs" />
-    <Compile Include="enums\SelectStatus.cs" />
     <Compile Include="messages\control\SeparateReq.cs" />
     <Compile Include="messages\data\BoolItem.cs" />
     <Compile Include="messages\data\ListItem.cs" />
@@ -68,7 +69,7 @@
     <Compile Include="messages\data\DataItem.cs" />
     <Compile Include="messages\data\Format.cs" />
     <Compile Include="messages\data\DataMessage.cs" />
-    <Compile Include="enums\MessageType.cs" />
+    <Compile Include="messages\MessageType.cs" />
     <Compile Include="messages\data\StringItem.cs" />
     <Compile Include="messages\Message.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
