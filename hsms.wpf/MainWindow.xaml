@@ -1,0 +1,27 @@
+﻿<Window x:Class="hsms.wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:hsms.wpf"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="5*" />
+        </Grid.ColumnDefinitions>
+        <Border Padding="2"/>
+        <StackPanel Grid.Column ="0"  Background="#eee">
+            <Button Command="{Binding ConnectCommand}" Content="Connect" IsEnabled="{Binding CanTryToConnect}" Margin="10 10 "/>
+            <Button Command="{Binding DisconnectCommand}" Content="Disconnect" IsEnabled="{Binding CannotConnect}" Margin="10 10 "/>
+        </StackPanel>
+        <DockPanel Grid.Column="1" Margin="0 0 10 10">
+            <Border Padding="5"/>
+            <Label DockPanel.Dock="Top" FontWeight="SemiBold" Background="#eee">Sec Log</Label>
+            <TextBox Text="{Binding LogLine}" DockPanel.Dock="Bottom" VerticalContentAlignment="Top" IsReadOnly="True" VerticalScrollBarVisibility="Auto"/>
+        </DockPanel>
+
+    </Grid>
+</Window>

@@ -24,6 +24,11 @@ namespace Semi.Hsms
 		#endregion
 
 		#region Class events
+		public event EventHandler IsConnecting;
+		/// <summary>
+		/// 
+		/// </summary>
+		public event EventHandler IsListening;
 		/// <summary>
 		/// 
 		/// </summary>
@@ -116,6 +121,14 @@ namespace Semi.Hsms
 		{
 			switch( entry.Type )
 			{
+				case EventType.IsConnecting:
+					IsConnecting?.Invoke(this, EventArgs.Empty);
+					break;
+
+				case EventType.IsListening:
+					IsListening?.Invoke(this, EventArgs.Empty);
+					break;
+
 				case EventType.Connected:
 					Connected?.Invoke( this, EventArgs.Empty );
 					break;

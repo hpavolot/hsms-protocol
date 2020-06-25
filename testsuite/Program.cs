@@ -1,4 +1,5 @@
 ﻿#region Usings
+using Semi.Hsms.connections;
 using Semi.Hsms.Messages;
 using System;
 using System.Diagnostics;
@@ -25,8 +26,6 @@ namespace Semi.Hsms.TestSuite
 				.Build();
 
 			var connection = new Connection( config );
-
-			
 
 			//connection.T3Timeout += ( s, ea ) => Console.WriteLine( "Message was not delivered" );
 

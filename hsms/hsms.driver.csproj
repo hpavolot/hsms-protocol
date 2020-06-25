@@ -48,11 +48,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="config\Configurator.cs" />
+    <Compile Include="connections\ActiveMode.cs" />
+    <Compile Include="connections\Passive Mode.cs" />
+    <Compile Include="connections\ReceiveMessage.cs" />
+    <Compile Include="connections\SendMessage.cs" />
+    <Compile Include="connections\State.cs" />
+    <Compile Include="connections\Transaction.cs" />
+    <Compile Include="connections\TransactionCheck.cs" />
     <Compile Include="events\EventType.cs" />
     <Compile Include="events\EventDispatcher.cs" />
     <Compile Include="connections\Connection.cs" />
-    <Compile Include="connections\PassiveConnection.cs" />
-    <Compile Include="connections\ActiveConnection.cs" />
     <Compile Include="messages\Coder.cs" />
     <Compile Include="messages\control\ControlMessage.cs" />
     <Compile Include="messages\control\DeselectReq.cs" />

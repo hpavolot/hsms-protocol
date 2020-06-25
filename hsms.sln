@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hsms.testsuite", "testsuite
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hsms.tests", "tests\hsms.tests.csproj", "{107A3F0A-D6A6-4779-AF66-5B0C2624F4BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hsms.wpf", "hsms.wpf\hsms.wpf.csproj", "{92116F3E-C71E-44BC-ADB7-B019ED4607E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{107A3F0A-D6A6-4779-AF66-5B0C2624F4BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{107A3F0A-D6A6-4779-AF66-5B0C2624F4BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{107A3F0A-D6A6-4779-AF66-5B0C2624F4BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92116F3E-C71E-44BC-ADB7-B019ED4607E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92116F3E-C71E-44BC-ADB7-B019ED4607E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92116F3E-C71E-44BC-ADB7-B019ED4607E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92116F3E-C71E-44BC-ADB7-B019ED4607E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
