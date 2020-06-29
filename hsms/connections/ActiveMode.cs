@@ -19,7 +19,7 @@ namespace Semi.Hsms.connections
         {
             lock (_syncObject)
             {
-                Events.Add(EventType.IsConnecting);
+                Events.Add(EventType.IsConnecting, _config.Port);
 
                 var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 

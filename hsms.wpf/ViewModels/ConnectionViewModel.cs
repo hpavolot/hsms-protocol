@@ -1,11 +1,10 @@
 ﻿#region Usings
 using hsms.wpf.ViewModels.Base;
-using Semi.Hsms;
+using hsms.wpf.Views;
 using Semi.Hsms.connections;
 using Semi.Hsms.Messages;
 using System;
 using System.Windows.Input;
-using static Semi.Hsms.Configurator;
 #endregion
 
 namespace hsms.wpf.ViewModels
@@ -19,7 +18,7 @@ namespace hsms.wpf.ViewModels
         /// <summary>
         /// 
         /// </summary>
-        private readonly Connection _connection;
+        private Connection _connection;
         /// <summary>
         /// 
         /// </summary>
@@ -28,7 +27,11 @@ namespace hsms.wpf.ViewModels
         /// 
         /// </summary>
         private bool _canTryToConnect = true;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly ConfigurationViewModel _configurationViewModel;
+        
         #endregion
 
         #region Class properties
@@ -89,34 +92,36 @@ namespace hsms.wpf.ViewModels
         /// 
         /// </summary>
         public ICommand ClearLogCommand { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public ICommand ConfigureCommand { get; private set; }
+
 
         #endregion
 
         #endregion
 
-        #region Constructor
+        #region Class initialization
         /// <summary>
         /// 
         /// </summary>
         public ConnectionViewModel()
         {
-            var config = new ConfigurationBuilder()
-                 .IP("127.0.0.1")
-                 .Port(11000)
-                 .Mode(ConnectionMode.Active)
-                 .T5(2)
-                 .Build();
+            _configurationViewModel = new ConfigurationViewModel();
 
-            _connection = new Connection(config);
-
+            InitializeCommands();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        private void InitializeCommands()
+        {
+            ConfigureCommand = new RelayCommand(Configure);
             ConnectCommand = new RelayCommand(Start);
             DisconnectCommand = new RelayCommand(Stop);
             SendCommand = new RelayCommand(Send);
             ClearLogCommand = new RelayCommand(ClearLog);
-
-
-            SubscribeToEvents();
-
         }
         /// <summary>
         /// 
@@ -125,27 +130,32 @@ namespace hsms.wpf.ViewModels
         {
             _connection.Events.Connected += (s, ea) => LogLine = "CONNECTION ESTABLISHED";
             _connection.Events.Disconnected += (s, ea) => LogLine = "HSMS DISCONNECTED";
-            _connection.Events.IsConnecting += (s, ea) => LogLine = "HSMS IS CONNECTING ACTIVELY";
+            _connection.Events.IsConnecting += (s, ea) => LogLine = $"HSMS IS CONNECTING ACTIVELY: {ea}";
             _connection.Events.IsListening += (s, ea) => LogLine = "HSMS IS LISTENING PASSIVELY";
-            _connection.Events.Sent += (s, ea) => LogLine = $"SEND: {ea.ToString()} {ea.Context.ToString()}";
-            _connection.Events.Received += (s, ea) => LogLine = $"RCV: {ea.ToString()} {ea.Context.ToString()}";
-            _connection.Events.T3Timeout += (s, ea) => LogLine = $"Message has not been delivered: {ea.ToString()} {ea.Context.ToString()}";
+            _connection.Events.Sent += (s, ea) => LogLine = $"SEND: {ea} {ea.Context}";
+            _connection.Events.Received += (s, ea) => LogLine = $"RCV: {ea} {ea.Context}";
+            _connection.Events.T3Timeout += (s, ea) => LogLine = $"Message has not been delivered: {ea} {ea.Context}";
         }
 
         #endregion
+
+        #region Class methods
         /// <summary>
         /// 
         /// </summary>
-        public void Start()
+        private void Start()
         {
+            _connection = new Connection(_configurationViewModel.Config);
+
             _connection.Start();
             CanTryToConnect = false;
 
+            SubscribeToEvents();
         }
         /// <summary>
         /// 
         /// </summary>
-        public void Stop()
+        private void Stop()
         {
             _connection.Stop();
             CanTryToConnect = true;
@@ -153,7 +163,7 @@ namespace hsms.wpf.ViewModels
         /// <summary>
         /// 
         /// </summary>
-        public void Send()
+        private void Send()
         {
             var m = DataMessage
                 .Builder
@@ -165,10 +175,22 @@ namespace hsms.wpf.ViewModels
 
             _connection.Send(m);
         }
-
-        public void ClearLog()
+        /// <summary>
+        /// 
+        /// </summary>
+        private void ClearLog()
         {
             LogLine = default;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        private void Configure()
+        {
+            ConfigurationView view = new ConfigurationView();
+            view.DataContext = _configurationViewModel;
+            view.ShowDialog();
+        }
+        #endregion
     }
 }
