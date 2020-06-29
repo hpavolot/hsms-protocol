@@ -2,6 +2,7 @@
 using hsms.wpf.ViewModels.Base;
 using Semi.Hsms;
 using Semi.Hsms.connections;
+using Semi.Hsms.Messages;
 using System;
 using System.Windows.Input;
 using static Semi.Hsms.Configurator;
@@ -42,7 +43,11 @@ namespace hsms.wpf.ViewModels
             }
             set
             {
-                _logLine += "[" + DateTime.Now + "] " + value + "\r\n";
+                if (string.IsNullOrEmpty(value))
+                    _logLine = default;
+                else
+                    _logLine += "[" + DateTime.Now + "] " + value + "\r\n";
+
                 OnPropertyChanged("LogLine");
             }
         }
@@ -76,6 +81,14 @@ namespace hsms.wpf.ViewModels
         /// 
         /// </summary>
         public ICommand DisconnectCommand { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public ICommand SendCommand { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public ICommand ClearLogCommand { get; private set; }
 
         #endregion
 
@@ -98,11 +111,25 @@ namespace hsms.wpf.ViewModels
 
             ConnectCommand = new RelayCommand(Start);
             DisconnectCommand = new RelayCommand(Stop);
+            SendCommand = new RelayCommand(Send);
+            ClearLogCommand = new RelayCommand(ClearLog);
 
+
+            SubscribeToEvents();
+
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        private void SubscribeToEvents()
+        {
             _connection.Events.Connected += (s, ea) => LogLine = "CONNECTION ESTABLISHED";
             _connection.Events.Disconnected += (s, ea) => LogLine = "HSMS DISCONNECTED";
             _connection.Events.IsConnecting += (s, ea) => LogLine = "HSMS IS CONNECTING ACTIVELY";
             _connection.Events.IsListening += (s, ea) => LogLine = "HSMS IS LISTENING PASSIVELY";
+            _connection.Events.Sent += (s, ea) => LogLine = $"SEND: {ea.ToString()} {ea.Context.ToString()}";
+            _connection.Events.Received += (s, ea) => LogLine = $"RCV: {ea.ToString()} {ea.Context.ToString()}";
+            _connection.Events.T3Timeout += (s, ea) => LogLine = $"Message has not been delivered: {ea.ToString()} {ea.Context.ToString()}";
         }
 
         #endregion
@@ -122,6 +149,26 @@ namespace hsms.wpf.ViewModels
         {
             _connection.Stop();
             CanTryToConnect = true;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Send()
+        {
+            var m = DataMessage
+                .Builder
+                .NewContext()
+                .Device(1)
+                .Stream(1)
+                .Function(101)
+                .Build();
+
+            _connection.Send(m);
+        }
+
+        public void ClearLog()
+        {
+            LogLine = default;
         }
     }
 }

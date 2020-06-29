@@ -7,21 +7,36 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="5*" />
-        </Grid.ColumnDefinitions>
-        <Border Padding="2"/>
-        <StackPanel Grid.Column ="0"  Background="#eee">
-            <Button Command="{Binding ConnectCommand}" Content="Connect" IsEnabled="{Binding CanTryToConnect}" Margin="10 10 "/>
-            <Button Command="{Binding DisconnectCommand}" Content="Disconnect" IsEnabled="{Binding CannotConnect}" Margin="10 10 "/>
-        </StackPanel>
-        <DockPanel Grid.Column="1" Margin="0 0 10 10">
-            <Border Padding="5"/>
-            <Label DockPanel.Dock="Top" FontWeight="SemiBold" Background="#eee">Sec Log</Label>
-            <TextBox Text="{Binding LogLine}" DockPanel.Dock="Bottom" VerticalContentAlignment="Top" IsReadOnly="True" VerticalScrollBarVisibility="Auto"/>
-        </DockPanel>
+    <DockPanel>
+        <ToolBarTray DockPanel.Dock="Top" Background="#eee">
+            <ToolBar>
+                <Button Command="{Binding ConfigureCommand}" Content="Configure" />
+                <Button Command="{Binding ConnectCommand}" Content="Connect" IsEnabled="{Binding CanTryToConnect}" Margin="10 10 "/>
+                <Button Command="{Binding DisconnectCommand}" Content="Disconnect" IsEnabled="{Binding CannotConnect}" Margin="10 10 "/>
+            </ToolBar>
 
-    </Grid>
+            <ToolBar>
+                <Button Command="{Binding SendCommand}" Content="Send" IsEnabled="{Binding CannotConnect}" Margin="10 10 "/>
+            </ToolBar>
+        
+            <ToolBar>
+                <Button Command="{Binding ClearLogCommand}" Content="Clear Log" Margin="10 10 "/>
+            </ToolBar>
+            
+        </ToolBarTray>
+
+        <DockPanel DockPanel.Dock="Bottom">
+            <StackPanel DockPanel.Dock="Left">
+                <Label Content="Message Explorer" DockPanel.Dock="Top"  Background="#eee" 
+                       BorderThickness="1" BorderBrush="LightGray"/>
+            </StackPanel>
+
+            <DockPanel DockPanel.Dock="Right">
+                <Label Content="Sec Log" DockPanel.Dock="Top" Background="#eee" 
+                       BorderThickness="1" BorderBrush="LightGray"/>
+                <TextBox Text="{Binding LogLine}" DockPanel.Dock="Bottom" VerticalContentAlignment="Top" IsReadOnly="True" VerticalScrollBarVisibility="Auto"/>
+            </DockPanel>
+
+        </DockPanel>
+    </DockPanel>
 </Window>

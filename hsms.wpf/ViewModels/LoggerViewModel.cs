@@ -30,7 +30,5 @@ namespace hsms.wpf.ViewModels
             }
         }
         #endregion
-
-  
     }
 }
