@@ -1,9 +1,8 @@
 ﻿# region Usings
-using hsms.wpf.ViewModels.Base;
 using Semi.Hsms.config;
 #endregion
 
-namespace hsms.wpf.Models
+namespace hsms.wpf
 {
     /// <summary>
     /// 
@@ -90,7 +89,7 @@ namespace hsms.wpf.Models
         /// </summary>
         public Configuration()
         {
-            Mode = ConnectionMode.Passive;
+            Mode = ConnectionMode.Active;
             IP = "127.0.0.1";
             Port = 11005;
         }

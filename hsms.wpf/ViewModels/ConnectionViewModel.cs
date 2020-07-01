@@ -1,13 +1,11 @@
 ﻿#region Usings
-using hsms.wpf.ViewModels.Base;
-using hsms.wpf.Views;
 using Semi.Hsms.connections;
 using Semi.Hsms.Messages;
 using System;
 using System.Windows.Input;
 #endregion
 
-namespace hsms.wpf.ViewModels
+namespace hsms.wpf
 {
     /// <summary>
     /// 

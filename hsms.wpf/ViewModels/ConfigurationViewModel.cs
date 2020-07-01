@@ -1,11 +1,10 @@
 ﻿#region Usings
-using hsms.wpf.Models;
-using hsms.wpf.ViewModels.Base;
 using Semi.Hsms.config;
 using System;
 using System.Windows.Input;
 #endregion
-namespace hsms.wpf.ViewModels
+
+namespace hsms.wpf
 {
     /// <summary>
     /// 
@@ -24,11 +23,14 @@ namespace hsms.wpf.ViewModels
         /// <summary>
         /// 
         /// </summary>
-        private Configuration _originalConfig;
+        private readonly Configuration _originalConfig;
 
         #endregion
 
         #region Class properties
+        /// <summary>
+        /// 
+        /// </summary>
         public Configuration Configuration { get => _config; private set { } }
         /// <summary>
         /// 
@@ -67,7 +69,7 @@ namespace hsms.wpf.ViewModels
         public ConfigurationViewModel()
         {
             _config = new Configuration();
-            _originalConfig = _config;
+            _originalConfig = new Configuration();
 
             SaveCommand = new RelayCommand(SaveConfigurationSettings);
             CancelCommand = new RelayCommand(Cancel);

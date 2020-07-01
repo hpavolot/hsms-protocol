@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace hsms.wpf.ViewModels.Base
+namespace hsms.wpf
 {
     /// <summary>
     /// 

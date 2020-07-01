@@ -1,7 +1,6 @@
-﻿using hsms.wpf.ViewModels;
-using System.Windows;
+﻿using System.Windows;
 
-namespace hsms.wpf.Views
+namespace hsms.wpf
 {
     /// <summary>
     /// Interaction logic for ConfigureConnectionView.xaml
@@ -19,6 +18,9 @@ namespace hsms.wpf.Views
 
         }
 
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
 
+        }
     }
 }

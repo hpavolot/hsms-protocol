@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace hsms.wpf.ViewModels.Base
+namespace hsms.wpf
 {
     public class BaseViewModel : INotifyPropertyChanged
     {

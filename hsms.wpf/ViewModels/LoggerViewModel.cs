@@ -1,7 +1,7 @@
-﻿using hsms.wpf.ViewModels.Base;
+﻿
 using System;
 
-namespace hsms.wpf.ViewModels
+namespace hsms.wpf
 {
     public class LoggerViewModel: BaseViewModel
     {
