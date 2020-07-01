@@ -8,8 +8,8 @@
     <Window.Resources>
         <converters:EnumBooleanConverter x:Key="enumToBooleanConverter"/>
     </Window.Resources>
-    
-  
+
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -32,12 +32,12 @@
             </Grid.ColumnDefinitions>
 
             <Label Content="Mode :" Grid.Row="0" Grid.Column="0" />
-            
+
             <RadioButton Content="Active"  Grid.Row="0" Grid.Column="1" VerticalAlignment="Center"              
                          IsChecked="{Binding Configuration.Mode, 
                          Converter={StaticResource enumToBooleanConverter}, 
                          ConverterParameter={x:Static enums:ConnectionMode.Active}}" />
-            
+
             <RadioButton Content="Passive" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center"
                          IsChecked="{Binding Configuration.Mode, 
                          Converter={StaticResource enumToBooleanConverter}, 
@@ -45,7 +45,10 @@
 
             <Label Content="IP Address :" Grid.Row="1" Grid.Column="0"/>
             <TextBox Text="{Binding Configuration.IP}"
-                Grid.Row="1" Grid.Column="1" BorderBrush="#eee" Height="20" Margin="0 0 10 0"/>
+                     IsEnabled="{Binding Configuration.Mode,
+                     Converter={StaticResource enumToBooleanConverter},
+                     ConverterParameter={x:Static enums:ConnectionMode.Active}}" 
+                     Grid.Row="1" Grid.Column="1" BorderBrush="#eee" Height="20" Margin="0 0 10 0"/>
 
             <Label Content="Local Port :"  Grid.Row="1" Grid.Column="2"/>
             <TextBox Text="{Binding Configuration.Port}"
