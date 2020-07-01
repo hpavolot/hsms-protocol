@@ -47,7 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="config\ConfigurationBuilder.cs" />
     <Compile Include="config\Configurator.cs" />
+    <Compile Include="config\ConnectionMode.cs" />
     <Compile Include="connections\ActiveMode.cs" />
     <Compile Include="connections\Passive Mode.cs" />
     <Compile Include="connections\ReceiveMessage.cs" />

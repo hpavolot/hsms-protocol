@@ -1,4 +1,5 @@
 ﻿#region Usings
+using Semi.Hsms.config;
 using Semi.Hsms.connections;
 using Semi.Hsms.Messages;
 using System;

@@ -1,15 +1,16 @@
-﻿using hsms.wpf.ViewModels.Base;
-using Semi.Hsms;
+﻿#region Usings
+using hsms.wpf.Models;
+using hsms.wpf.ViewModels.Base;
+using Semi.Hsms.config;
 using System;
 using System.Windows.Input;
-using static Semi.Hsms.Configurator;
-
+#endregion
 namespace hsms.wpf.ViewModels
 {
     /// <summary>
     /// 
     /// </summary>
-    internal class ConfigurationViewModel: BaseViewModel
+    internal class ConfigurationViewModel
     {
         #region Class members
         /// <summary>
@@ -19,86 +20,30 @@ namespace hsms.wpf.ViewModels
         /// <summary>
         /// 
         /// </summary>
-        private string _ipAddress;
+        private readonly Configuration _config;
         /// <summary>
         /// 
         /// </summary>
-        private int _port;
-        /// <summary>
-        /// 
-        /// </summary>
-        private ConnectionMode _mode;
+        private Configuration _originalConfig;
 
         #endregion
 
         #region Class properties
+        public Configuration Configuration { get => _config; private set { } }
         /// <summary>
         /// 
         /// </summary>
-        public string IP
+        public Configurator Configurator
         {
             get
             {
-                return _ipAddress;
-            }
-            set
-            {
-                if (value == _ipAddress)
-                    return;
-
-                _ipAddress = value;
-                OnPropertyChanged("IP");
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public int Port
-        {
-            get
-            {
-                return _port;
-            }
-            set
-            {
-                if (value == _port)
-                    return;
-
-                _port = value;
-                OnPropertyChanged("Port");
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public ConnectionMode Mode
-        {
-            get
-            {
-                return _mode;
-            }
-            set
-            {
-                if (value == _mode)
-                    return;
-
-                _mode = value;
-                OnPropertyChanged("Mode");
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public Configurator Config
-        {
-            get
-            {
-                return new ConfigurationBuilder()
-                 .IP(IP)
-                 .Port(Port)
-                 .Mode(Mode)
+                return Configurator
+                 .Builder
+                 .IP(Configuration.IP)
+                 .Port(Configuration.Port)
+                 .Mode(Configuration.Mode)
                  .T5(2)
-                 .Build(); 
+                 .Build();
             }
         }
 
@@ -121,9 +66,8 @@ namespace hsms.wpf.ViewModels
         /// </summary>
         public ConfigurationViewModel()
         {
-            Mode = ConnectionMode.Active;
-            IP = "127.0.0.1";
-            Port = 11000;
+            _config = new Configuration();
+            _originalConfig = _config;
 
             SaveCommand = new RelayCommand(SaveConfigurationSettings);
             CancelCommand = new RelayCommand(Cancel);
@@ -136,6 +80,9 @@ namespace hsms.wpf.ViewModels
         /// </summary>
         private void SaveConfigurationSettings()
         {
+            _originalConfig.IP = _config.IP;
+            _originalConfig.Port = _config.Port;
+            _originalConfig.Mode = _config.Mode;
 
             this.Closing?.Invoke(this, EventArgs.Empty);
         }
@@ -144,6 +91,10 @@ namespace hsms.wpf.ViewModels
         /// </summary>
         private void Cancel()
         {
+            _config.IP = _originalConfig.IP;
+            _config.Port = _originalConfig.Port;
+            _config.Mode = _originalConfig.Mode;
+
             this.Closing?.Invoke(this, EventArgs.Empty);
         }
 

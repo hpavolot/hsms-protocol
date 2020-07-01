@@ -145,7 +145,7 @@ namespace hsms.wpf.ViewModels
         /// </summary>
         private void Start()
         {
-            _connection = new Connection(_configurationViewModel.Config);
+            _connection = new Connection(_configurationViewModel.Configurator);
 
             _connection.Start();
             CanTryToConnect = false;

@@ -1,10 +1,12 @@
 ﻿#region Usings
-using Semi.Hsms.config;
+using Semi.Hsms.connections;
 using Semi.Hsms.Messages;
+using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-
+using static Semi.Hsms.Configurator;
 #endregion
 
 namespace Semi.Hsms.connections
