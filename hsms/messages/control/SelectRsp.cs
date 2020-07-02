@@ -39,7 +39,7 @@ namespace Semi.Hsms.Messages
         /// <returns></returns>
         public override string ToString()
         {
-            return "select rsp";
+            return "Select.rsp";
         }
         /// <summary>
         /// 

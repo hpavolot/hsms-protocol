@@ -1,9 +1,8 @@
 ﻿#region Usings
+using hsms.wpf.Models;
+using Semi.Hsms;
 using Semi.Hsms.connections;
 using Semi.Hsms.Messages;
-using System;
-using System.Linq;
-using System.Text;
 using System.Windows.Input;
 #endregion
 
@@ -22,7 +21,7 @@ namespace hsms.wpf
         /// <summary>
         /// 
         /// </summary>
-        private string _logLine;
+        private readonly Logger _logger;
         /// <summary>
         /// 
         /// </summary>
@@ -38,22 +37,8 @@ namespace hsms.wpf
         /// <summary>
         /// 
         /// </summary>
-        public string LogLine
-        {
-            get
-            {
-                return _logLine;
-            }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    _logLine = default;
-                else
-                    _logLine += "[" + DateTime.Now + "] " + value + "\r\n";
+        public Logger Logger => _logger;
 
-                OnPropertyChanged("LogLine");
-            }
-        }
         /// <summary>
         /// 
         /// </summary>
@@ -109,6 +94,7 @@ namespace hsms.wpf
         public ConnectionViewModel()
         {
             _configurationViewModel = new ConfigurationViewModel();
+            _logger = new Logger();
 
             InitializeCommands();
         }
@@ -128,57 +114,15 @@ namespace hsms.wpf
         /// </summary>
         private void SubscribeToEvents()
         {
-            _connection.Events.Connected += (s, ea) => LogLine = "CONNECTION ESTABLISHED";
-            _connection.Events.Disconnected += (s, ea) => LogLine = "HSMS DISCONNECTED";
-            _connection.Events.IsConnecting += (s, ea) => LogLine = $"HSMS IS CONNECTING ACTIVELY: {ea}";
-            _connection.Events.IsListening += (s, ea) => LogLine = $"HSMS IS LISTENING PASSIVELY: {ea}";
-            _connection.Events.Sent += (s, ea) =>
-            {
-                StringBuilder sb = new StringBuilder("SEND : ");
+            _connection.Events.Connecting += (s, ea) => _logger.LogEvent(EventType.Connecting, ea);
+            _connection.Events.Connected += (s, ea) => _logger.LogEvent(EventType.Connected, ea);
+            _connection.Events.Disconnected += (s, ea) => _logger.LogEvent(EventType.Disconnected, ea);
+            _connection.Events.Listening += (s, ea) => _logger.LogEvent(EventType.Listening, ea);
+            _connection.Events.Sent += (s, ea) => _logger.LogEvent(EventType.Sent,ea);
+            _connection.Events.Received += (s, ea) => _logger.LogEvent(EventType.Received, ea);
+            ////_connection.Events.T3Timeout += (s, ea) => LogLine = $"Message has not been delivered: {ea} {ea.Context}";
 
-                var hex = string.Join(" ", ea.Item1.Skip(4).Select(b => b.ToString("X2")));
-                sb.Append(hex);
-
-                var prefix = ea.Item1.Take(4).ToArray();
-                Array.Reverse(prefix);
-                var len = BitConverter.ToInt32(prefix, 0);
-                sb.Append($"  len={len} ");
-
-                var m = ea.Item2;
-                if (m is DataMessage)
-                {
-                    var dm = m as DataMessage; 
-                    sb.Append($" S{dm.Stream}F{dm.Function} ");
-                }
-                sb.Append($"  SB=[{m.Context}]");
-                sb.Append($"  (({m}))");
-
-                LogLine = sb.ToString();
-            };
-
-            _connection.Events.Received += (s, ea) =>
-            {
-                StringBuilder sb = new StringBuilder("RECV : ");
-                var hex = string.Join(" ", ea.Item1.Select(b => b.ToString("X2")));
-                sb.Append(hex);
-
-                var len = ea.Item1.Length;
-                sb.Append($"  len={len} ");
-
-                var m = ea.Item2;
-                if (m is DataMessage)
-                {
-                    var dm = m as DataMessage;
-                    sb.Append($" S{dm.Stream}F{dm.Function} ");
-                }
-                sb.Append($"  SB=[{m.Context}]");
-                sb.Append($"  (({m}))");
-
-                LogLine = sb.ToString();
-            };
-            _connection.Events.T3Timeout += (s, ea) => LogLine = $"Message has not been delivered: {ea} {ea.Context}";
         }
-
         #endregion
 
         #region Class methods
@@ -222,7 +166,7 @@ namespace hsms.wpf
         /// </summary>
         private void ClearLog()
         {
-            LogLine = default;
+            _logger.Clear();
         }
         /// <summary>
         /// 

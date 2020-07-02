@@ -62,11 +62,11 @@
     </ApplicationDefinition>
     <Compile Include="Converters\EnumBooleanConverter.cs" />
     <Compile Include="Models\Configuration.cs" />
+    <Compile Include="Models\Logger.cs" />
     <Compile Include="ViewModels\Base\RelayCommand.cs" />
     <Compile Include="ViewModels\Base\BaseViewModel.cs" />
     <Compile Include="ViewModels\ConfigurationViewModel.cs" />
     <Compile Include="ViewModels\ConnectionViewModel.cs" />
-    <Compile Include="ViewModels\LoggerViewModel.cs" />
     <Compile Include="Views\ConfigurationView.xaml.cs">
       <DependentUpon>ConfigurationView.xaml</DependentUpon>
     </Compile>

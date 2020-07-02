@@ -8,11 +8,11 @@ namespace Semi.Hsms
 	/// </summary>
 	public enum EventType
 	{
-		IsListening,
+		Listening,
 		/// <summary>
 		/// 
 		/// </summary>
-		IsConnecting,
+		Connecting,
 		/// <summary>
 		/// 
 		/// </summary>

@@ -148,7 +148,7 @@ namespace Semi.Hsms.connections
 
                 _queueToSend.Clear();
 
-                Events.Add(EventType.Disconnected);
+                Events.Add(EventType.Disconnected, _config.Port);
 
                 var t5FireTime = (_bRun) ? _config.T5 * 1000 : Timeout.Infinite;
                 _timerT5ConnectSeparationTimeout.Change(t5FireTime, Timeout.Infinite);

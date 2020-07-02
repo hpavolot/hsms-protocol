@@ -178,7 +178,7 @@ namespace Semi.Hsms.connections
 
                 _state = State.ConnectedSelected;
 
-                Events.Add(EventType.Connected);
+                Events.Add(EventType.Connected, _config.Port);
 
             }
         }
@@ -200,7 +200,7 @@ namespace Semi.Hsms.connections
 
                         _state = State.ConnectedSelected;
 
-                        Events.Add(EventType.Connected);
+                        Events.Add(EventType.Connected,_config.Port);
                     }
                     else
                     {

@@ -34,7 +34,7 @@
             <DockPanel DockPanel.Dock="Right">
                 <Label Content="Sec Log" DockPanel.Dock="Top" Background="#eee" 
                        BorderThickness="1" BorderBrush="LightGray"/>
-                <TextBox Text="{Binding LogLine}" DockPanel.Dock="Bottom" VerticalContentAlignment="Top" IsReadOnly="True" VerticalScrollBarVisibility="Auto"/>
+                <TextBox Text="{Binding Logger.LogLine}" DockPanel.Dock="Bottom" VerticalContentAlignment="Top" IsReadOnly="True" VerticalScrollBarVisibility="Auto"/>
             </DockPanel>
 
         </DockPanel>
