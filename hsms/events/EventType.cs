@@ -24,6 +24,10 @@ namespace Semi.Hsms
 		/// <summary>
 		/// 
 		/// </summary>
+		Terminated,
+		/// <summary>
+		/// 
+		/// </summary>
 		Sent,
 		/// <summary>
 		/// 

@@ -1,4 +1,5 @@
 ﻿using Semi.Hsms.Messages;
+using System;
 using System.Threading;
 
 namespace Semi.Hsms.connections
@@ -63,7 +64,7 @@ namespace Semi.Hsms.connections
 
                 _socket.Send(arr);
 
-                Events.Add(EventType.Sent, m);
+                Events.Add(EventType.Sent, new Tuple<byte[], Message>(arr,m));
             }
             catch
             {

@@ -24,8 +24,7 @@ namespace Semi.Hsms.connections
 
                 var buffer = new byte[Coder.MESSAGE_PREFIX_LEN];
 
-                _socket.BeginReceive(buffer, 0, buffer.Length,
-                                                 SocketFlags.None, OnRecv, buffer);
+                _socket.BeginReceive(buffer, 0, buffer.Length,SocketFlags.None, OnRecv, buffer);
             }
         }
         /// <summary>
@@ -52,7 +51,7 @@ namespace Semi.Hsms.connections
 
                     var m = Coder.Decode(buffer);
 
-                    Events.Add(EventType.Received, m);
+                    Events.Add(EventType.Received, new Tuple<byte[], Message>(buffer, m));
 
                     AnalyzeRecv(m);
 
@@ -143,7 +142,8 @@ namespace Semi.Hsms.connections
                     break;
 
                 case MessageType.SeparateReq:
-                    throw new Exception();
+                    HandleSeparateReq();
+                    break;
             }
         }
         /// <summary>
@@ -237,6 +237,13 @@ namespace Semi.Hsms.connections
                 if (m.Status == 0)
                     _state = State.ConnectedNotSelected;
             }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        protected void HandleSeparateReq()
+        {
+            CloseConnection();
         }
         #endregion
     }

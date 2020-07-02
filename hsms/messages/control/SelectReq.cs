@@ -34,7 +34,7 @@ namespace Semi.Hsms.Messages
         /// <returns></returns>
         public override string ToString()
         {
-            return $"select req";
+            return $"Select.req";
         }
         #endregion
     }

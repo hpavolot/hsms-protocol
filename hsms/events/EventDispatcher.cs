@@ -40,11 +40,15 @@ namespace Semi.Hsms
 		/// <summary>
 		/// 
 		/// </summary>
-		public event EventHandler<Message> Sent;
+		public event EventHandler Terminated;
 		/// <summary>
 		/// 
 		/// </summary>
-		public event EventHandler<Message> Received;
+		public event EventHandler<Tuple<byte[], Message>> Sent;
+		/// <summary>
+		/// 
+		/// </summary>
+		public event EventHandler<Tuple<byte[], Message>> Received;
 		/// <summary>
 		/// 
 		/// </summary>
@@ -137,12 +141,16 @@ namespace Semi.Hsms
 					Disconnected?.Invoke( this, EventArgs.Empty );
 					break;
 
+				case EventType.Terminated:
+					Terminated?.Invoke(this, EventArgs.Empty);
+					break;
+
 				case EventType.Sent:
-					Sent?.Invoke( this, ( Message )entry.Argument );
+					Sent?.Invoke( this, (Tuple<byte[], Message>) entry.Argument );
 					break;
 
 				case EventType.Received:
-					Received?.Invoke( this, ( Message )entry.Argument );
+					Received?.Invoke( this, (Tuple<byte[], Message>) entry.Argument );
 					break;
 
 				case EventType.T3Timeout:

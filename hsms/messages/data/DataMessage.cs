@@ -199,7 +199,7 @@ namespace Semi.Hsms.Messages
 		/// <returns></returns>
 		public override string ToString()
 		{
-			return $"data message";
+			return $"Data.msg";
 		}
 		#endregion
 	}
