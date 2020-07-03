@@ -29,7 +29,12 @@ namespace hsms.wpf
 		/// <summary>
 		/// 
 		/// </summary>
-		private readonly ConfigurationViewModel _configurationViewModel;
+		private readonly VmConfiguration _vmConfiguration;
+		/// <summary>
+		/// 
+		/// </summary>
+		private readonly VmLogger _vmLogger;
+
 
 		#endregion
 
@@ -37,8 +42,7 @@ namespace hsms.wpf
 		/// <summary>
 		/// 
 		/// </summary>
-		public Logger Logger => _logger;
-
+		public VmLogger VmLogger => _vmLogger;
 		/// <summary>
 		/// 
 		/// </summary>
@@ -93,8 +97,10 @@ namespace hsms.wpf
 		/// </summary>
 		public VmConnection()
 		{
-			_configurationViewModel = new ConfigurationViewModel();
+			_vmConfiguration = new VmConfiguration();
 			_logger = new Logger();
+
+			_vmLogger = new VmLogger(_logger);
 
 			InitializeCommands();
 		}
@@ -131,7 +137,7 @@ namespace hsms.wpf
 		/// </summary>
 		private void Start()
 		{
-			_connection = new Connection( _configurationViewModel.Configurator );
+			_connection = new Connection( _vmConfiguration.Configurator );
 
 			_connection.Start();
 			CanTryToConnect = false;
@@ -174,7 +180,7 @@ namespace hsms.wpf
 		private void Configure()
 		{
 			ConfigurationView view = new ConfigurationView();
-			view.DataContext = _configurationViewModel;
+			view.DataContext = _vmConfiguration;
 			view.ShowDialog();
 		}
 		#endregion

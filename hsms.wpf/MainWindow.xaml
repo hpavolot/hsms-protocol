@@ -23,7 +23,7 @@
                 <Button Command="{Binding ClearLogCommand}" Content="Clear Log" Margin="10 10 "/>
             </ToolBar>
             
-        </ToolBarTray>
+        </ToolBarTray> 
 
         <DockPanel DockPanel.Dock="Bottom">
             <StackPanel DockPanel.Dock="Left">
@@ -34,7 +34,8 @@
             <DockPanel DockPanel.Dock="Right">
                 <Label Content="Sec Log" DockPanel.Dock="Top" Background="#eee" 
                        BorderThickness="1" BorderBrush="LightGray"/>
-                <TextBox Text="{Binding Logger.LogLine}" DockPanel.Dock="Bottom" VerticalContentAlignment="Top" IsReadOnly="True" VerticalScrollBarVisibility="Auto"/>
+                <TextBox Text="{Binding VmLogger.LogLine, Mode=OneWay}"
+                         DockPanel.Dock="Bottom" VerticalContentAlignment="Top" IsReadOnly="True" VerticalScrollBarVisibility="Auto"/>
             </DockPanel>
 
         </DockPanel>

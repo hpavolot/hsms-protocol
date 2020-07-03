@@ -60,7 +60,7 @@
     <Compile Include="events\EventType.cs" />
     <Compile Include="events\EventDispatcher.cs" />
     <Compile Include="connections\Connection.cs" />
-    <Compile Include="messages\Coder.cs" />
+    <Compile Include="coder\Encoder.cs" />
     <Compile Include="messages\control\ControlMessage.cs" />
     <Compile Include="messages\control\DeselectReq.cs" />
     <Compile Include="messages\control\DeselectRsp.cs" />
@@ -76,6 +76,7 @@
     <Compile Include="messages\data\DataItem.cs" />
     <Compile Include="messages\data\Format.cs" />
     <Compile Include="messages\data\DataMessage.cs" />
+    <Compile Include="coder\Decoder.cs" />
     <Compile Include="messages\MessageType.cs" />
     <Compile Include="messages\data\StringItem.cs" />
     <Compile Include="messages\Message.cs" />
@@ -84,8 +85,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="log\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

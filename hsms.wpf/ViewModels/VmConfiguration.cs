@@ -9,7 +9,7 @@ namespace hsms.wpf
 	/// <summary>
 	/// 
 	/// </summary>
-	internal class ConfigurationViewModel
+	internal class VmConfiguration
 	{
 		#region Class members
 		/// <summary>
@@ -66,7 +66,7 @@ namespace hsms.wpf
 		/// <summary>
 		/// 
 		/// </summary>
-		public ConfigurationViewModel()
+		public VmConfiguration()
 		{
 			_config = new Configuration();
 			_originalConfig = new Configuration();

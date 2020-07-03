@@ -1,6 +1,8 @@
-﻿using Semi.Hsms.Messages;
+﻿#region Usings
+using Semi.Hsms.Messages;
 using System;
 using System.Threading;
+#endregion
 
 namespace Semi.Hsms.connections
 {

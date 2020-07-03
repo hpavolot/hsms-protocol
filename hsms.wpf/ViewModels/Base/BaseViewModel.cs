@@ -44,7 +44,6 @@ namespace hsms.wpf
 		}
 		#endregion
 	}
-
 	/// <summary>
 	/// 
 	/// </summary>
@@ -127,7 +126,5 @@ namespace hsms.wpf
 			}
 		}
 		#endregion
-
-	
 	}
 }

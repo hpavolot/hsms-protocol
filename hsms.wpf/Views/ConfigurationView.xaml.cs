@@ -12,7 +12,7 @@ namespace hsms.wpf
 			InitializeComponent();
 			this.Activated += ( sender, args ) =>
 			{
-				var viewModel = ( ConfigurationViewModel )DataContext;
+				var viewModel = ( VmConfiguration )DataContext;
 				viewModel.Closing += ( s, ea ) => Close();
 			};
 

@@ -1,151 +1,133 @@
-﻿#region Usings
-using Semi.Hsms;
+﻿using Semi.Hsms;
 using Semi.Hsms.Messages;
 using System;
 using System.Linq;
 using System.Text;
-#endregion
 
 namespace hsms.wpf.Models
 {
-	/// <summary>
-	/// 
-	/// </summary>
-	class Logger : BaseViewModel
-	{
-		#region Class members
-		/// <summary>
-		/// 
-		/// </summary>
-		private string _logLine;
+    /// <summary>
+    /// 
+    /// </summary>
+    public class Logger
+    {
+        #region  Class members
+        /// <summary>
+        /// 
+        /// </summary>
+        public event EventHandler LogLineChanged;
+        #endregion
 
-		#endregion
+        #region Class properties
+        /// <summary>
+        /// 
+        /// </summary>
+        public string LogLine { get; private set; } = string.Empty;
+        #endregion
 
-		#region Class properties
-		/// <summary>
-		/// 
-		/// </summary>
-		public string LogLine
-		{
-			get
-			{
-				return _logLine;
-			}
-			set
-			{
-				if( string.IsNullOrEmpty( value ) )
-					_logLine = default;
-				else
-					_logLine += value;
+        #region Class methods
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="s"></param>
+        public void WriteLine(string s)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("[");
+            sb.Append(DateTime.Now);
+            sb.Append("]  ");
+            sb.Append(s);
+            sb.Append("\r\n");
 
+            LogLine += sb.ToString();
+            LogLineChanged?.Invoke(this, EventArgs.Empty);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <param name="port"></param>
+        public void LogEvent(EventType eventType, int port)
+        {
+            string s = null;
 
+            switch (eventType)
+            {
+                case EventType.Connected:
+                    s = "HSMS CONNECTED : ";
+                    break;
 
-				FirePropertyChanged( () => LogLine );
-			}
-		}
-		#endregion
+                case EventType.Disconnected:
+                    s = " HSMS DISCONNECTED : ";
+                    break;
 
-		#region Class methods
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="s"></param>
-		public void WriteLine( string s )
-		{
-			StringBuilder sb = new StringBuilder();
-			sb.Append( "[" );
-			sb.Append( DateTime.Now );
-			sb.Append( "]  " );
-			sb.Append( s );
-			sb.Append( "\r\n" );
+                case EventType.Connecting:
+                    s = "HSMS CONNECTING ACTIVE : ";
+                    break;
 
-			LogLine = sb.ToString();
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="eventType"></param>
-		/// <param name="port"></param>
-		public void LogEvent( EventType eventType, int port )
-		{
-			string s = null;
+                case EventType.Listening:
+                    s = "HSMS LISTENING PASSIVE : ";
+                    break;
+            }
 
-			switch( eventType )
-			{
-				case EventType.Connected:
-					s = "HSMS CONNECTED : ";
-					break;
+            WriteLine($"{s}{port}");
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <param name="ea"></param>
+        public void LogEvent(EventType eventType, Tuple<byte[], Message> ea)
+        {
+            StringBuilder sb = new StringBuilder();
 
-				case EventType.Disconnected:
-					s = " HSMS DISCONNECTED : ";
-					break;
+            string hex = null; ;
+            int len = 0;
 
-				case EventType.Connecting:
-					s = "HSMS CONNECTING ACTIVE : ";
-					break;
+            if (eventType == EventType.Sent)
+            {
+                sb.Append("SEND : ");
 
-				case EventType.Listening:
-					s = "HSMS LISTENING PASSIVE : ";
-					break;
-			}
+                hex = string.Join(" ", ea.Item1.Skip(4).Select(b => b.ToString("X2")));
 
-			WriteLine( $"{s}{port.ToString()}" );
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="eventType"></param>
-		/// <param name="ea"></param>
-		public void LogEvent( EventType eventType, Tuple<byte [], Message> ea )
-		{
-			StringBuilder sb = new StringBuilder();
+                var prefix = ea.Item1.Take(4).ToArray();
+                Array.Reverse(prefix);
+                len = BitConverter.ToInt32(prefix, 0);
+            }
+            else if (eventType == EventType.Received)
+            {
+                sb.Append("RECV : ");
 
-			string hex = null; ;
-			int len = 0;
+                hex = string.Join(" ", ea.Item1.Select(b => b.ToString("X2")));
 
-			if( eventType == EventType.Sent )
-			{
-				sb.Append( "SEND : " );
+                len = ea.Item1.Length;
+            }
 
-				hex = string.Join( " ", ea.Item1.Skip( 4 ).Select( b => b.ToString( "X2" ) ) );
+            sb.Append(hex);
 
-				var prefix = ea.Item1.Take( 4 ).ToArray();
-				Array.Reverse( prefix );
-				len = BitConverter.ToInt32( prefix, 0 );
-			}
-			else if( eventType == EventType.Received )
-			{
-				sb.Append( "RECV : " );
+            var m = ea.Item2;
+            if (m is DataMessage)
+            {
+                var dm = m as DataMessage;
+                sb.Append($" S{dm.Stream}F{dm.Function} ");
+            }
 
-				hex = string.Join( " ", ea.Item1.Select( b => b.ToString( "X2" ) ) );
+            sb.Append($"  [len={len}] ");
+            sb.Append($"  SB=[{m.Context}]");
+            sb.Append($"  (({m}))");
 
-				len = ea.Item1.Length;
-			}
+            WriteLine(sb.ToString());
 
-			sb.Append( hex );
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Clear()
+        {
+            LogLine = string.Empty;
+            LogLineChanged?.Invoke(this, EventArgs.Empty);
+        }
 
-			var m = ea.Item2;
-			if( m is DataMessage )
-			{
-				var dm = m as DataMessage;
-				sb.Append( $" S{dm.Stream}F{dm.Function} " );
-			}
-
-			sb.Append( $"  len={len} " );
-			sb.Append( $"  SB=[{m.Context}]" );
-			sb.Append( $"  (({m}))" );
-
-			WriteLine( sb.ToString() );
-
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		public void Clear()
-		{
-			LogLine = default;
-		}
-
-		#endregion
-	}
+        #endregion
+    }
 }
