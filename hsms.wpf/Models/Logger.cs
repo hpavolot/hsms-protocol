@@ -1,8 +1,10 @@
-﻿using Semi.Hsms;
+﻿#region Usings
+using Semi.Hsms;
 using Semi.Hsms.Messages;
 using System;
 using System.Linq;
 using System.Text;
+#endregion
 
 namespace hsms.wpf.Models
 {
@@ -23,6 +25,7 @@ namespace hsms.wpf.Models
         /// 
         /// </summary>
         public string LogLine { get; private set; } = string.Empty;
+
         #endregion
 
         #region Class methods
