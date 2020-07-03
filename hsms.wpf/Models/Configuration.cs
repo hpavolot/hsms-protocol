@@ -1,99 +1,99 @@
-﻿# region Usings
+﻿#region Usings
 using Semi.Hsms.config;
 #endregion
 
 namespace hsms.wpf
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public class Configuration : BaseViewModel
-    {
-        #region Class members
-        /// <summary>
-        /// 
-        /// </summary>
-        private string _ipAddress;
-        /// <summary>
-        /// 
-        /// </summary>
-        private int _port;
-        /// <summary>
-        /// 
-        /// </summary>
-        private ConnectionMode _mode;
+	/// <summary>
+	/// 
+	/// </summary>
+	public class Configuration : BaseViewModel
+	{
+		#region Class members
+		/// <summary>
+		/// 
+		/// </summary>
+		private string _ipAddress;
+		/// <summary>
+		/// 
+		/// </summary>
+		private int _port;
+		/// <summary>
+		/// 
+		/// </summary>
+		private ConnectionMode _mode;
 
-        #endregion
+		#endregion
 
-        #region Class properties
-        /// <summary>
-        /// 
-        /// </summary>
-        public string IP
-        {
-            get
-            {
-                return _ipAddress;
-            }
-            set
-            {
-                if (value == _ipAddress)
-                    return;
+		#region Class properties
+		/// <summary>
+		/// 
+		/// </summary>
+		public string IP
+		{
+			get
+			{
+				return _ipAddress;
+			}
+			set
+			{
+				if( value == _ipAddress )
+					return;
 
-                _ipAddress = value;
-                OnPropertyChanged("IP");
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public int Port
-        {
-            get
-            {
-                return _port;
-            }
-            set
-            {
-                if (value == _port)
-                    return;
+				_ipAddress = value;
+				FirePropertyChanged( () => IP );
+			}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		public int Port
+		{
+			get
+			{
+				return _port;
+			}
+			set
+			{
+				if( value == _port )
+					return;
 
-                _port = value;
-                OnPropertyChanged("Port");
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public ConnectionMode Mode
-        {
-            get
-            {
-                return _mode;
-            }
-            set
-            {
-                if (value == _mode)
-                    return;
+				_port = value;
+				FirePropertyChanged( () => Port );
+			}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		public ConnectionMode Mode
+		{
+			get
+			{
+				return _mode;
+			}
+			set
+			{
+				if( value == _mode )
+					return;
 
-                _mode = value;
-                OnPropertyChanged("Mode");
-            }
-        }
+				_mode = value;
+				FirePropertyChanged( () => Mode );
+			}
+		}
 
-        #endregion
+		#endregion
 
-        #region Class initialization
-        /// <summary>
-        /// 
-        /// </summary>
-        public Configuration()
-        {
-            Mode = ConnectionMode.Active;
-            IP = "127.0.0.1";
-            Port = 11005;
-        }
+		#region Class initialization
+		/// <summary>
+		/// 
+		/// </summary>
+		public Configuration()
+		{
+			Mode = ConnectionMode.Active;
+			IP = "127.0.0.1";
+			Port = 11005;
+		}
 
-        #endregion
-    }
+		#endregion
+	}
 }

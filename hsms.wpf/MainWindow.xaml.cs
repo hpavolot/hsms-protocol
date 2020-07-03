@@ -10,7 +10,7 @@ namespace hsms.wpf
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new ConnectionViewModel();
+            DataContext = new VmConnection();
         }
     }
 }

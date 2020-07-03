@@ -60,7 +60,7 @@
                      Rows="1" Columns="2" 
                      Margin="5 5 20 5">
             <Button Content="Ok" Command ="{Binding SaveCommand}" Grid.Column="0" Margin="0 0 10 0"/>
-            <Button Content="Cancel" Command ="{Binding CancelCommand}" Grid.Column="1"/>
+            <Button Content="Cancel" Click="Button_Click" Grid.Column="1"/>
         </UniformGrid>
     </Grid>
 </Window>

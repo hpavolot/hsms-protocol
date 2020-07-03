@@ -59,7 +59,10 @@ namespace Semi.Hsms.connections
 
                     SendSelectReq();
 
-                    new Thread(MessageProcessor).Start();
+                    new Thread( MessageProcessor ) 
+                    {
+                      IsBackground = true
+                    }.Start();
 
                     _timerT5ConnectSeparationTimeout.Change(Timeout.Infinite, Timeout.Infinite);
                 }
