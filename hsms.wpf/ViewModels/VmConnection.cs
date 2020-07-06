@@ -114,7 +114,11 @@ namespace hsms.wpf
 		/// </summary>
 		private void SubscribeToEvents()
 		{
-			_connection.Events.Connecting += ( s, ea ) => _logger.LogEvent( EventType.Connecting, ea );
+			_connection.Events.Connecting += ( s, ea ) =>
+			{
+				_logger.LogEvent( EventType.Connecting, ea );
+			};
+			
 			_connection.Events.Connected += ( s, ea ) => _logger.LogEvent( EventType.Connected, ea );
 			_connection.Events.Disconnected += ( s, ea ) => _logger.LogEvent( EventType.Disconnected, ea );
 			_connection.Events.Listening += ( s, ea ) => _logger.LogEvent( EventType.Listening, ea );
@@ -131,12 +135,12 @@ namespace hsms.wpf
 		/// </summary>
 		private void Start()
 		{
-			_connection = new Connection( _configurationViewModel.Configurator );
+			_connection = Connection.Create( _configurationViewModel.Configurator );
+
+			SubscribeToEvents();
 
 			_connection.Start();
 			CanTryToConnect = false;
-
-			SubscribeToEvents();
 		}
 		/// <summary>
 		/// 

@@ -26,7 +26,7 @@ namespace Semi.Hsms.TestSuite
 				.T5( 2 )
 				.Build();
 
-			var connection = new Connection( config );
+			var connection = Connection.Create( config );
 
 			//connection.T3Timeout += ( s, ea ) => Console.WriteLine( "Message was not delivered" );
 
