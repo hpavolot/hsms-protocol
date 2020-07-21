@@ -1,5 +1,6 @@
 ﻿#region Usings
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Semi.Hsms;
 using Semi.Hsms.Messages;
 using System;
 using System.Linq;

@@ -25,11 +25,20 @@ namespace hsms.wpf
 		/// <summary>
 		/// 
 		/// </summary>
-		private bool _canTryToConnect = true;
+		private readonly VmLogger _vmLogger;
 		/// <summary>
 		/// 
 		/// </summary>
-		private readonly ConfigurationViewModel _configurationViewModel;
+		private readonly VmConfiguration _vmConfiguration;
+		/// <summary>
+		/// 
+		/// </summary>
+		private readonly Configuration _configuration;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		private bool _canTryToConnect = true;
 
 		#endregion
 
@@ -37,8 +46,11 @@ namespace hsms.wpf
 		/// <summary>
 		/// 
 		/// </summary>
-		public Logger Logger => _logger;
-
+		public VmLogger VmLogger => _vmLogger;
+		/// <summary>
+		/// 
+		/// </summary>
+		public VmConfiguration VmConfiguration => _vmConfiguration;
 		/// <summary>
 		/// 
 		/// </summary>
@@ -93,8 +105,11 @@ namespace hsms.wpf
 		/// </summary>
 		public VmConnection()
 		{
-			_configurationViewModel = new ConfigurationViewModel();
+			_configuration = new Configuration();
+			_vmConfiguration = new VmConfiguration(_configuration);
+
 			_logger = new Logger();
+			_vmLogger = new VmLogger(_logger);
 
 			InitializeCommands();
 		}
@@ -114,11 +129,7 @@ namespace hsms.wpf
 		/// </summary>
 		private void SubscribeToEvents()
 		{
-			_connection.Events.Connecting += ( s, ea ) =>
-			{
-				_logger.LogEvent( EventType.Connecting, ea );
-			};
-			
+			_connection.Events.Connecting += ( s, ea ) => _logger.LogEvent( EventType.Connecting, ea );
 			_connection.Events.Connected += ( s, ea ) => _logger.LogEvent( EventType.Connected, ea );
 			_connection.Events.Disconnected += ( s, ea ) => _logger.LogEvent( EventType.Disconnected, ea );
 			_connection.Events.Listening += ( s, ea ) => _logger.LogEvent( EventType.Listening, ea );
@@ -135,11 +146,11 @@ namespace hsms.wpf
 		/// </summary>
 		private void Start()
 		{
-			_connection = Connection.Create( _configurationViewModel.Configurator );
+			_connection = new Connection(_configuration.Configurator);
+			_connection.Start();
 
 			SubscribeToEvents();
 
-			_connection.Start();
 			CanTryToConnect = false;
 		}
 		/// <summary>
@@ -177,10 +188,14 @@ namespace hsms.wpf
 		/// </summary>
 		private void Configure()
 		{
-			ConfigurationView view = new ConfigurationView();
-			view.DataContext = _configurationViewModel;
+			ConfigurationView view = new ConfigurationView
+			{
+				DataContext = _vmConfiguration
+			};
+
 			view.ShowDialog();
 		}
+
 		#endregion
 	}
 }
