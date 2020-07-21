@@ -146,7 +146,7 @@ namespace hsms.wpf
 		/// </summary>
 		private void Start()
 		{
-			_connection = new Connection(_configuration.Configurator);
+			_connection = Connection.Create(_configuration.Configurator);
 			_connection.Start();
 
 			SubscribeToEvents();

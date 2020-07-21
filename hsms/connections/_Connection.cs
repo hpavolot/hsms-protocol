@@ -347,7 +347,7 @@ namespace Semi.Hsms.connections
           //HandleSeparateReq();
           throw new Exception( "we must write nice exception here" );
           //	ConnException.Throw( ConnException.Code.SeparateReq );
-          break;
+          //break;
       }
     }
     /// <summary>
